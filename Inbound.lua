@@ -13,6 +13,46 @@ local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
 ----Aimbot Tab
 local AimbotTab = Window:CreateTab("Aimbot")
 
+local SilentAimSection = AimbotTab:CreateSection("Silent Aim")
+
+local SilentAimEnabled = false
+local SilentAimToggle =	SilentAimSection:CreateToggle("Enable", nil, function(State)
+	SilentAimEnabled = State
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+local ImageLabel = Instance.new("ImageLabel")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ImageLabel.Parent = ScreenGui
+ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.BackgroundTransparency = 1.000
+ImageLabel.Position = UDim2.new(0.5, 0. ,0.48, 0)
+ImageLabel.Size = UDim2.new(0, 100, 0, 100)
+ImageLabel.Image = "http://www.roblox.com/asset/?id=3366059043"
+ImageLabel.ImageTransparency = 0.5
+ImageLabel.AnchorPoint = Vector2.new(0.5,0.5)
+ImageLabel.Visible = false
+local SilentAimFOV = 1
+local SilentAimFOVSlider = SilentAimSection:CreateSlider("Amount", 0,500, 5 ,true, function(Value)
+	SilentAimFOV = Value
+	ImageLabel.Size = UDim2.new(0, Value*2, 0, Value*2)
+end)
+
+local FovCircleEnable = false
+local FovCircleToggle =	SilentAimSection:CreateToggle("Enable FOV Circle", false, function(State)
+	ImageLabel.Visible = State
+end)
+
+local HeadShotChance = 1
+local HeadShotSlider = SilentAimSection:CreateSlider("Headshot chance", 0,100, nil ,true, function(Value)
+	HeadShotChance = Value
+end)
+
+local BodyShotChance = 1
+local BodyShotSlider = SilentAimSection:CreateSlider("Bodyshot chance", 0,100, nil ,true, function(Value)
+	BodyShotChance = Value
+end)
 
 ----ESP Tab
 local ESPTab = Window:CreateTab("ESP")
@@ -563,6 +603,219 @@ workspace.ChildAdded:Connect(function(new)
 	end
 end)
 
+local lplr = game:GetService("Players").LocalPlayer
+local m = lplr:GetMouse()
+
+local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+local oldIndex = mt.__index
+if setreadonly then setreadonly(mt, false) else make_writeable(mt, true) end
+local namecallMethod = getnamecallmethod or get_namecall_method
+local newClose = newcclosure or function(f) return f end
+local target;
+local latestshot = nil
+local bodyname = 'Head'
+local cangivecframe = 0
+local fakeanim = Instance.new('Animation',workspace)
+fakeanim.AnimationId = 'rbxassetid://0'
+
+local backtrackfolder = Instance.new('Folder',workspace)
+backtrackfolder.Name = 'backtrackfolder'
+function backtrack(character)
+	pcall(function()
+		if not character:FindFirstChild("backtrack") then
+			Instance.new("Sky",character).Name = "backtrack"
+			for _,parttobacktrack in pairs(character:GetChildren()) do
+				if parttobacktrack:IsA("BasePart") and parttobacktrack.Name ~= 'Gun' then
+					if parttobacktrack.Name == "Head" then
+						spawn(function()
+							for i = 1, BTLength do
+								local backtrackPART = Instance.new("Part",backtrackfolder)
+								backtrackPART.Size = parttobacktrack.Size
+								backtrackPART.Color = Color3.fromRGB(255,255,255)
+								backtrackPART.CanCollide = false
+								backtrackPART.Anchored = true
+								backtrackPART.Material = Enum.Material.Metal
+								backtrackPART.Name = "backtrackPART"
+								local thing = Instance.new("ObjectValue")
+								thing.Parent = backtrackPART
+								thing.Name = "thing"
+								thing.Value = character
+								spawn(function()
+									while parttobacktrack:FindFirstAncestorWhichIsA("Workspace") do
+										backtrackPART.CFrame = parttobacktrack.CFrame
+										wait(i * 0.02)
+									end
+									backtrackPART:Destroy()
+								end)
+							end	
+						end)
+					end
+				end
+			end
+		end
+	end)
+end
+
+function smallblock(pos)
+	if pos then
+		local block = Instance.new('Part',workspace)
+		block.Anchored = true
+		block.Size = Vector3.new(0.3,0.3,0.3)
+		block.Position = pos
+		block.CanCollide = false
+		block.Material = Enum.Material.SmoothPlastic
+		block.Color = Color3.fromRGB(255, 71, 129)
+		game.Debris:AddItem(block,2)
+	end
+end
+	
+local function beam(part,pos,yeeet)
+	if part then
+		if part.Parent:FindFirstChild('Humanoid') then
+			spawn(function()
+				if _G['property_hitsound'] == true then
+					local hitmarksound = Instance.new('Sound',workspace)
+					hitmarksound.SoundId = 'rbxassetid://4491275997'
+					hitmarksound.PlayOnRemove = true
+					hitmarksound.Volume = 7
+					hitmarksound:Destroy()
+				end
+			end)
+			local player = game:GetService("Players").LocalPlayer
+			local ray = Ray.new(yeeet, (pos - yeeet).unit * 300)
+			local part, position = workspace:FindPartOnRay(ray, player.Character, false, true)
+			local beam = Instance.new("Part", workspace)
+			beam.BrickColor = BrickColor.new("Bright red")
+			beam.FormFactor = "Custom"
+			beam.Material = "Neon"
+			beam.Transparency = 0.5
+			beam.Anchored = true
+			beam.Locked = true
+			beam.CanCollide = false
+			local distance = (player.Character.Head.CFrame.p - position).magnitude
+			beam.Size = Vector3.new(0.08, 0.05, distance)
+			beam.CFrame = CFrame.new(player.Character.Head.CFrame.p, position) * CFrame.new(0, 0, -distance / 2)
+			game.Debris:AddItem(beam,2)
+		end
+	end
+end
+
+
+function gettarget()
+	local nearestmag = SilentAimFOV
+	local nearestcharacter = nil
+	pcall(function()
+		local lplr = game:GetService("Players").LocalPlayer
+		local t = nil
+		local m = lplr:GetMouse()
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character and plr.Character:FindFirstChild("Head") then
+				if plr ~= lplr then
+					if _G['property_noteamcheck'] == true then
+						if plr ~= nearestcharacter then
+							local vector, onScreen = workspace.CurrentCamera:WorldToScreenPoint(plr.Character.Head.CFrame.p)
+							local dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
+							if dist < nearestmag then
+								if 0 < plr.Character.Humanoid.Health then
+									nearestcharacter = plr.Character
+									nearestmag = dist
+								end
+							end
+						end
+					else
+						if plr.TeamColor ~= lplr.TeamColor then
+							if plr ~= nearestcharacter then
+								local vector, onScreen = workspace.CurrentCamera:WorldToScreenPoint(plr.Character.Head.CFrame.p)
+								local dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
+								if dist < nearestmag then
+									if 0 < plr.Character.Humanoid.Health then
+										nearestcharacter = plr.Character
+										nearestmag = dist
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
+	return nearestcharacter
+end
+
+mt.__namecall = newClose(function(...)
+	local method = namecallMethod()
+	local args = {...}
+	if method == "FindPartOnRayWithIgnoreList" then
+		table.insert(args[3],backtrackfolder)
+		if target and lplr.Character and SilentAimEnabled == true then 
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target[bodyname].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		elseif _G['property_nospread'] == true then
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		end
+	elseif tostring(method) == "FireServer" and tostring(args[1]) == "HitPart" then
+		if _G['property_instantkill'] == true then
+			args[9] = 10
+		end
+		if m.Target and m.Target.Name == 'backtrackPART' and 0 < m.Target.thing.Value.Humanoid.Health then
+			args[2] = m.Target.thing.Value.Head
+			args[3] = m.Target.thing.Value.Head.CFrame.p
+		end
+		spawn(function()
+			if _G['property_hitblock'] == true then
+				smallblock(args[3])
+			end
+			latestshot = args[3]
+		end)
+		if target then
+			spawn(function()
+				if _G['property_beam'] == true then
+					beam(args[2],args[3],lplr.Character.Head.CFrame.p)
+				end
+			end)
+		end
+		-- bypass start
+	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
+		return wait(99e99)
+	elseif tostring(method) == "FireServer" and string.find(tostring(args[1]),'{') then
+		return wait(99e99)
+	end
+	-- bypass end
+	return oldNamecall(unpack(args))
+end)
+
+
+
+
+----Loops
+spawn(function()
+	while wait(0.7) do
+		for _,player in pairs(game.Players:GetPlayers()) do
+			if player.Character then
+				if player ~= game.Players.LocalPlayer then
+					if BTEnable == true then
+						backtrack(player.Character)
+						print('backtrack on')
+					elseif player.Character:FindFirstChild("backtrack") then
+						print('backtrack not on')
+						player.Character:FindFirstChild("backtrack"):Destroy()
+						backtrackfolder:ClearAllChildren()
+					end
+				end
+			else
+				if _G['property_antiheadshot'] == true then
+					pcall(function()
+						game.Players.LocalPlayer.Character:FindFirstChild('FakeHead'):Destroy()
+						game.Players.LocalPlayer.Character:FindFirstChild('HeadHB'):Destroy()
+					end)
+				end
+			end
+		end
+	end
+end)
+
 game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PLEASE KEEP IT FORMATED AND NOT MAKING RANDOM RENDERSTEP FUNCTIONS <3)
 	if ChamsEnabled then
 		turn_on()
@@ -593,4 +846,23 @@ game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PL
 		game.Players.LocalPlayer.CameraMaxZoomDistance = 0
 		game.Players.LocalPlayer.CameraMinZoomDistance = 0
 	end
+	local yeet = gettarget()
+	if yeet then
+		target = yeet
+	else
+		target = nil
+	end
+	local xd = math.random(0,100)
+	if ForceHeadShot then
+		bodyname = 'Head'
+	else
+		if (HeadShotChance or 0) <= xd then 
+			bodyname = 'UpperTorso'
+		elseif (BodyShotChance or 0) >= xd then
+			bodyname = 'Head'
+		else
+			bodyname = 'Head'
+		end
+	end
+
 end)
