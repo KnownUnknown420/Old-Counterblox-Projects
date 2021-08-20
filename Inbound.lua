@@ -1,10 +1,11 @@
 --UnknownSoultions
 
 local Config = {
-	WindowName = "UnknownSoultions",
+	WindowName = "Inbound.XYZ",
 	Color = Color3.fromRGB(255, 0, 0),
 	Keybind = Enum.KeyCode.Insert
 }
+
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
 local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
@@ -125,17 +126,47 @@ local AimbientColorPicker = WorldSettings:CreateColorpicker("Color", function(Co
 	AmbientColor = Color
 end)
 
-local FovChanger = WorldTab:CreateSection("Fov Changer")
+local SelfVisuals = WorldTab:CreateSection("Local Visuals")
 
 local FovEnabled = false
-local FovToggle= FovChanger:CreateToggle("Enabled", nil, function(State)
+local FovToggle= SelfVisuals:CreateToggle("Enabled", nil, function(State)
 	FovEnabled = State
 end)
 
 local DefualtFovValue = game.Workspace.CurrentCamera.FieldOfView
 local FovValue = DefualtFovValue
-local FovSlider = FovChanger:CreateSlider("Amount", 0,120,nil,true, function(Value)
+local FovSlider = SelfVisuals:CreateSlider("Amount", 0,120, math.floor(DefualtFovValue),true, function(Value)
 	FovValue = Value
+end)
+
+local ThirdPerson = false
+local ThirdPersonToggle= SelfVisuals:CreateToggle("Enable ThirdPerson", nil, function(State)
+	ThirdPerson = State
+end)
+local TPAmount = 0
+local TPSlider = SelfVisuals:CreateSlider("Amount", 0,50,nil,true, function(Value)
+	TPAmount = Value
+end)
+
+local BulletHoleToggle = SelfVisuals:CreateToggle("Disable Scope", nil, function(State)
+	if State then
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Scope.ImageTransparency = 1
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame1.BackgroundTransparency = 1
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame2.BackgroundTransparency = 1
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame3.BackgroundTransparency = 1
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame4.BackgroundTransparency = 1
+	else
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Scope.ImageTransparency = 0
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame1.BackgroundTransparency = 0
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame2.BackgroundTransparency = 0
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame3.BackgroundTransparency = 0
+		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame4.BackgroundTransparency = 0
+	end
+end)
+
+local ArmsEnable = true
+local TPArms = SelfVisuals:CreateToggle("Enable Arms", nil, function(State)
+	ArmsEnable = not State
 end)
 
 local Optimastion = WorldTab:CreateSection("Optimastion")
@@ -146,14 +177,13 @@ local BloodToggle = Optimastion:CreateToggle("Disable Blood", nil, function(Stat
 end)
 
 local BulletHolesEnabled = false
-local BulletHoleToggle = Optimastion:CreateToggle("Disable Bulletgoles", nil, function(State)
+local BulletHoleToggle = Optimastion:CreateToggle("Disable Bullet holes", nil, function(State)
 	BulletHolesEnabled = State
 end)
 
 local WorldShadows = Optimastion:CreateToggle("Disable Global Shadows", nil, function(State)
 	game.Lighting.GlobalShadows = not State
 end)
-
 
 ----MiscTab
 local MiscTab = Window:CreateTab("Misc")
@@ -468,7 +498,7 @@ function checkdebris(obj)
 		if obj.Name == 'Bullet' then
 			if BulletHolesEnabled == true then
 				obj:Destroy()
-			end--]]
+			end
 		elseif obj.Name == 'C4' then
 			if DroppedBombEspEnabled == true then
 				boxespweapon(obj)
@@ -476,7 +506,7 @@ function checkdebris(obj)
 		elseif obj.Name == 'Blood' then
 			if BloodEnabled == true then
 				obj:Destroy()
-			end--]]
+			end
 		end
 	end)
 end
@@ -484,26 +514,6 @@ end
 game:GetService("Workspace").Debris.ChildAdded:connect(function(obj)
 	checkdebris(obj)
 end)
-
-
-game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PLEASE KEEP IT FORMATED AND NOT MAKING RANDOM RENDERSTEP FUNCTIONS <3)
-	if ChamsEnabled then
-		turn_on()
-	else
-		turn_off()
-	end
-	if AmbientLighting then
-		game.Lighting.Ambient = AmbientColor
-	else
-		game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
-	end
-	if FovEnabled then
-		game.Workspace.CurrentCamera.FieldOfView = FovValue  
-	else
-		game.Workspace.CurrentCamera.FieldOfView  = DefualtFovValue
-	end
-end)
-
 
 workspace.ChildAdded:Connect(function(new)
 	if new.Name == "C4" and new:IsA("Model") and DroppedBombEspEnabled == true then
@@ -553,9 +563,34 @@ workspace.ChildAdded:Connect(function(new)
 	end
 end)
 
-
-
-
-
-
-
+game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PLEASE KEEP IT FORMATED AND NOT MAKING RANDOM RENDERSTEP FUNCTIONS <3)
+	if ChamsEnabled then
+		turn_on()
+	else
+		turn_off()
+	end
+	if AmbientLighting then
+		game.Lighting.Ambient = AmbientColor
+	else
+		game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+	end
+	if FovEnabled then
+		game.Workspace.CurrentCamera.FieldOfView = FovValue  
+	else
+		game.Workspace.CurrentCamera.FieldOfView  = DefualtFovValue
+	end
+	if ThirdPerson then
+		game.Players.LocalPlayer.CameraMaxZoomDistance = TPAmount
+		game.Players.LocalPlayer.CameraMinZoomDistance = TPAmount
+		if ArmsEnable then
+			for _,v in pairs(workspace.Camera:GetDescendants()) do 
+				pcall(function() 
+				v.Transparency=1
+				end)
+			end
+		end
+	else
+		game.Players.LocalPlayer.CameraMaxZoomDistance = 0
+		game.Players.LocalPlayer.CameraMinZoomDistance = 0
+	end
+end)
