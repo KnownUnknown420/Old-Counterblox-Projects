@@ -3,7 +3,7 @@
 local Config = {
 	WindowName = "UnknownSoultions",
 	Color = Color3.fromRGB(255, 0, 0),
-	Keybind = Enum.KeyCode.Equals
+	Keybind = Enum.KeyCode.Insert
 }
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
@@ -57,7 +57,7 @@ local ChamsEnemyToggle = Chams:CreateToggle("Enemy", nil, function(State)
 end)
 
 local TeamEnableChams = false
-local ChamsEnemyToggle = Chams:CreateToggle("Teammmates", nil, function(State)
+local ChamsTeamToggle = Chams:CreateToggle("Teammmates", nil, function(State)
 	TeamEnableChams = State
 end)
 
@@ -99,40 +99,49 @@ ChamsColorPicker:UpdateColor(Color3.fromRGB(255,255,255))
 ----World Tab
 local WorldTab = Window:CreateTab("World")
 
+local WorldColor = WorldTab:CreateSection("World Color")
 
+local ColorCorrection = Instance.new("ColorCorrectionEffect", game.Lighting)
+local ColorCorrectionColor  = Color3.fromRGB(255,255,255)
+local ColorCorrectionEffectToggle = WorldColor:CreateToggle("Enabled", nil, function(State)
+	ColorCorrection.Enabled = State
+end)
+
+local ColorEffectColor = WorldColor:CreateColorpicker("Color", function(Color)
+	ColorCorrection.TintColor = Color
+end)
+
+local WorldAmbient = WorldTab:CreateSection("World Ambient")
+
+local AmbientLighting = false
+local AmbientColorToggle = WorldAmbient:CreateToggle("Enabled", nil, function(State)
+	AmbientLighting = State
+end)
+
+local AmbientColor = Color3.fromRGB(127, 127, 127)
+local AimbientColorPicker = WorldAmbient:CreateColorpicker("Color", function(Color)
+	AmbientColor = Color
+end)
+
+----MiscTab
 local MiscTab = Window:CreateTab("Misc")
 
+local UiSettings = MiscTab:CreateSection("Ui Settings")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+local ToggleButtonUI = UiSettings:CreateToggle("UI Toggle", nil, function(State)
+	Window:Toggle(State)
+end)
+ToggleButtonUI:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""), function(Key)
+	Config.Keybind = Enum.KeyCode[Key]
+end)
+ToggleButtonUI:SetState(true)
 
 
 
 ----Scripts
 
 --ESP
-local Player = game:GetService("Players").LocalPlayer
+local Player  = game:GetService("Players").LocalPlayer
 local Camera = game:GetService("Workspace").CurrentCamera
 local Mouse = Player:GetMouse()
 
@@ -284,13 +293,14 @@ local chams = function()
 	for _, v in next, p do
 		if v.Character ~= nil and v.Character:FindFirstChild('Head') ~= nil  then
 			if v.TeamColor ~= player.TeamColor then
-				if EnemyEnableChams then-- enemy
+				if EnemyEnableChams then  -- enemy
 					if v ~= player then
 						local folder = Instance.new('Folder',player.PlayerGui)
 						folder.Name = v.Name
 						for _, part in pairs(v.Character:GetChildren()) do
 							if part:IsA('BasePart') then
 								if part:FindFirstChildOfClass("SpecialMesh") then
+									
 								else
 									local adorn = Instance.new('BoxHandleAdornment',folder)
 									adorn.Name = v.Name
@@ -324,6 +334,7 @@ local chams = function()
 						for _, part in pairs(v.Character:GetChildren()) do
 							if part:IsA('BasePart') then
 								if part:FindFirstChildOfClass("SpecialMesh") then
+									print("")
 								else
 									local adorn = Instance.new('BoxHandleAdornment',folder)
 									adorn.Name = v.Name
@@ -420,11 +431,11 @@ function boxespweapon(droppedgun)
 	yes5.Size = UDim2.new(1, 0, 0, 1)
 end
 
-local cameradebris = game:GetService("Workspace").Camera.Debris
 function checkdebris(obj)
 	spawn(function()
 		if obj.Name == 'Bullet' then
-			--[[if disablebulletholes == true then
+			--[[
+			if disablebulletholes == true then
 				obj:Destroy()
 			end--]]
 		elseif obj.Name == 'C4' then
@@ -449,13 +460,11 @@ game:GetService("RunService").RenderStepped:Connect(function() --RunService for 
 	else
 		turn_off()
 	end
-	
-	--ColorCorrection.TintColor = ColorCorrectionColor
-	--[[if AmbientLighting then
+	if AmbientLighting then
 		game.Lighting.Ambient = AmbientColor
 	else
 		game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
-	end--]]
+	end
 end)
 
 
@@ -506,6 +515,8 @@ workspace.ChildAdded:Connect(function(new)
 		end
 	end
 end)
+
+
 
 
 
