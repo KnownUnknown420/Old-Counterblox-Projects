@@ -34,7 +34,7 @@ ImageLabel.ImageTransparency = 0.5
 ImageLabel.AnchorPoint = Vector2.new(0.5,0.5)
 ImageLabel.Visible = false
 local SilentAimFOV = 1
-local SilentAimFOVSlider = SilentAimSection:CreateSlider("Amount", 0,500, 5 ,true, function(Value)
+local SilentAimFOVSlider = SilentAimSection:CreateSlider("FOV amount", 0,500, 5 ,true, function(Value)
 	SilentAimFOV = Value
 	ImageLabel.Size = UDim2.new(0, Value*2, 0, Value*2)
 end)
@@ -65,6 +65,32 @@ local Triggerdelay = 0
 local triggerdelayslider = triggerbotsection:CreateSlider("Delay (MS)", 0,100, nil ,true, function(Value)
 	Triggerdelay = Value / 10000
 end)
+
+local BacktrackSection = AimbotTab:CreateSection("Backtrack")
+
+local BTEnable = false
+local Backtracktoggle= BacktrackSection:CreateToggle("Enable",  false, function(State)
+	BTEnable = State
+end)
+
+local BTLength = 1
+local Backtrackslider = BacktrackSection:CreateSlider("Backtrack Tick", 0,100, 5 ,true, function(Value)
+	BTLength = Value
+end)
+
+local BacktrackReset = BacktrackSection:CreateButton("Reset Backtrack", function()
+	local OrginalState = BTEnable
+	BTEnable = false
+	wait(0.7)
+	BTEnable = OrginalState
+end)
+
+local BacktrackColor = Color3.fromHSV(0, 0, 1)
+local BTcolorpicker = BacktrackSection:CreateColorpicker("Color", function(Color)
+	BacktrackColor = Color
+end)
+
+
 
 ----ESP Tab
 local ESPTab = Window:CreateTab("ESP")
@@ -386,11 +412,6 @@ game:GetService("Players").PlayerAdded:Connect(function(v)
 	DrawESP(v)
 end)
 
-
-
-
-print("esp loaded")
-
 local players = game:GetService('Players')
 local player = players.LocalPlayer
 local char = player.Character
@@ -645,10 +666,11 @@ function backtrack(character)
 							for i = 1, BTLength do
 								local backtrackPART = Instance.new("Part",backtrackfolder)
 								backtrackPART.Size = parttobacktrack.Size
-								backtrackPART.Color = Color3.fromRGB(255,255,255)
+								backtrackPART.Color = BacktrackColor 
 								backtrackPART.CanCollide = false
 								backtrackPART.Anchored = true
 								backtrackPART.Material = Enum.Material.Metal
+								backtrackPART.Transparency = 0.5
 								backtrackPART.Name = "backtrackPART"
 								local thing = Instance.new("ObjectValue")
 								thing.Parent = backtrackPART
@@ -830,13 +852,13 @@ spawn(function() --bt and breakhead
 		for _,player in pairs(game.Players:GetPlayers()) do
 			if player.Character then
 				if player ~= game.Players.LocalPlayer then
-					if BTEnable == true then
-						backtrack(player.Character)
-						print('backtrack on')
-					elseif player.Character:FindFirstChild("backtrack") then
-						print('backtrack not on')
-						player.Character:FindFirstChild("backtrack"):Destroy()
-						backtrackfolder:ClearAllChildren()
+					if player.Team ~= lplr.Team then
+						if BTEnable == true then
+							backtrack(player.Character)
+						elseif player.Character:FindFirstChild("backtrack") then
+							player.Character:FindFirstChild("backtrack"):Destroy()
+							backtrackfolder:ClearAllChildren()
+						end
 					end
 				end
 			else
