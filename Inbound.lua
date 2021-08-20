@@ -138,6 +138,21 @@ local FovSlider = FovChanger:CreateSlider("Amount", 0,120,nil,true, function(Val
 	FovValue = Value
 end)
 
+local Optimastion = WorldTab:CreateSection("Optimastion")
+
+local BloodEnabled = false
+local BloodToggle = Optimastion:CreateToggle("Disable Blood", nil, function(State)
+	BloodEnabled = State
+end)
+
+local BulletHolesEnabled = false
+local BulletHoleToggle = Optimastion:CreateToggle("Disable Bulletgoles", nil, function(State)
+	BulletHolesEnabled = State
+end)
+
+local WorldShadows = Optimastion:CreateToggle("Disable Global Shadows", nil, function(State)
+	game.Lighting.GlobalShadows = not State
+end)
 
 
 ----MiscTab
@@ -451,8 +466,7 @@ end
 function checkdebris(obj)
 	spawn(function()
 		if obj.Name == 'Bullet' then
-			--[[
-			if disablebulletholes == true then
+			if BulletHolesEnabled == true then
 				obj:Destroy()
 			end--]]
 		elseif obj.Name == 'C4' then
@@ -460,7 +474,7 @@ function checkdebris(obj)
 				boxespweapon(obj)
 			end
 		elseif obj.Name == 'Blood' then
-			--[[if DisableBlood == true then
+			if BloodEnabled == true then
 				obj:Destroy()
 			end--]]
 		end
@@ -471,7 +485,8 @@ game:GetService("Workspace").Debris.ChildAdded:connect(function(obj)
 	checkdebris(obj)
 end)
 
-game:GetService("RunService").RenderStepped:Connect(function() --RunService for stupid loops!
+
+game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PLEASE KEEP IT FORMATED AND NOT MAKING RANDOM RENDERSTEP FUNCTIONS <3)
 	if ChamsEnabled then
 		turn_on()
 	else
@@ -537,6 +552,8 @@ workspace.ChildAdded:Connect(function(new)
 		end
 	end
 end)
+
+
 
 
 
