@@ -54,6 +54,18 @@ local BodyShotSlider = SilentAimSection:CreateSlider("Bodyshot chance", 0,100, n
 	BodyShotChance = Value
 end)
 
+local triggerbotsection = AimbotTab:CreateSection("Triggerbot")
+
+local TriggerbotEnable = false
+local triggerbottoggle = triggerbotsection:CreateToggle("Enable FOV Circle", false, function(State)
+	TriggerbotEnable = State
+end)
+
+local Triggerdelay = 0
+local triggerdelayslider = triggerbotsection:CreateSlider("Delay (MS)", 0,100, nil ,true, function(Value)
+	Triggerdelay = Value / 10000
+end)
+
 ----ESP Tab
 local ESPTab = Window:CreateTab("ESP")
 
@@ -790,7 +802,30 @@ end)
 
 
 ----Loops
-spawn(function()
+spawn(function() --Triggerbot
+	while wait(0.1) do
+		if TriggerbotEnable then
+			if lplr.Character then
+				if m.Target then
+					if m.Target.Parent:FindFirstChild("Humanoid") then
+						pcall(function()
+							if game.Players[m.Target.Parent.Name].Team ~= lplr.Team then
+								spawn(function()
+									wait(Triggerdelay)
+									mouse1press()
+									wait()
+									mouse1release()
+								end)
+							end
+						end)
+					end
+				end
+			end
+		end
+	end
+end)
+
+spawn(function() --bt and breakhead
 	while wait(0.7) do
 		for _,player in pairs(game.Players:GetPlayers()) do
 			if player.Character then
