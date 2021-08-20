@@ -99,29 +99,46 @@ ChamsColorPicker:UpdateColor(Color3.fromRGB(255,255,255))
 ----World Tab
 local WorldTab = Window:CreateTab("World")
 
-local WorldColor = WorldTab:CreateSection("World Color")
+local WorldSettings = WorldTab:CreateSection("World Lighting")
+
+local ColorCorrectionText = WorldSettings:CreateLabel("WorldTint")
 
 local ColorCorrection = Instance.new("ColorCorrectionEffect", game.Lighting)
 local ColorCorrectionColor  = Color3.fromRGB(255,255,255)
-local ColorCorrectionEffectToggle = WorldColor:CreateToggle("Enabled", nil, function(State)
+local ColorCorrectionEffectToggle = WorldSettings:CreateToggle("Enabled", nil, function(State)
 	ColorCorrection.Enabled = State
 end)
 
-local ColorEffectColor = WorldColor:CreateColorpicker("Color", function(Color)
+local ColorEffectColor = WorldSettings:CreateColorpicker("Color", function(Color)
 	ColorCorrection.TintColor = Color
 end)
 
-local WorldAmbient = WorldTab:CreateSection("World Ambient")
+local AmbientLighting = WorldSettings:CreateLabel("World Ambient")
 
 local AmbientLighting = false
-local AmbientColorToggle = WorldAmbient:CreateToggle("Enabled", nil, function(State)
+local AmbientColorToggle = WorldSettings:CreateToggle("Enabled", nil, function(State)
 	AmbientLighting = State
 end)
 
 local AmbientColor = Color3.fromRGB(127, 127, 127)
-local AimbientColorPicker = WorldAmbient:CreateColorpicker("Color", function(Color)
+local AimbientColorPicker = WorldSettings:CreateColorpicker("Color", function(Color)
 	AmbientColor = Color
 end)
+
+local FovChanger = WorldTab:CreateSection("Fov Changer")
+
+local FovEnabled = false
+local FovToggle= FovChanger:CreateToggle("Enabled", nil, function(State)
+	FovEnabled = State
+end)
+
+local DefualtFovValue = game.Workspace.CurrentCamera.FieldOfView
+local FovValue = DefualtFovValue
+local FovSlider = FovChanger:CreateSlider("Amount", 0,120,nil,true, function(Value)
+	FovValue = Value
+end)
+
+
 
 ----MiscTab
 local MiscTab = Window:CreateTab("Misc")
@@ -464,6 +481,11 @@ game:GetService("RunService").RenderStepped:Connect(function() --RunService for 
 		game.Lighting.Ambient = AmbientColor
 	else
 		game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+	end
+	if FovEnabled then
+		game.Workspace.CurrentCamera.FieldOfView = FovValue  
+	else
+		game.Workspace.CurrentCamera.FieldOfView  = DefualtFovValue
 	end
 end)
 
