@@ -10,15 +10,35 @@ local Config = {
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
 local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
 
-----Aimbot Tab
-local AimbotTab = Window:CreateTab("Aimbot")
+----Rage Tab
+local RageTab = Window:CreateTab("Rage")
 
-local Ragebot = AimbotTab:CreateSection("Rage bot")
+local Ragebot = RageTab:CreateSection("Rage bot")
 
 local RageBotEnable = false
-local FovCircleToggle =	Ragebot:CreateToggle("Enable", false, function(State)
+local RageToggle =	Ragebot:CreateToggle("Enable", false, function(State)
 	RageBotEnable = State
 end)
+
+local ResloverEnable = false1
+local ResloverToggle =	Ragebot:CreateToggle("Enable Reslover", false, function(State)
+	ResloverEnable = State
+end)
+
+local HitpartSelectOption = "Head"
+local HitpartSelect = Ragebot:CreateDropdown("Hit Boxes", {"Head","UpperTorso"}, function(String)
+	HitpartSelectOption = String
+end)
+HitpartSelect:SetOption("Head")
+
+local BodyAimSelectOption = "None"
+local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot","Double Tap",}, function(String)
+	BodyAimSelectOption = String
+end)
+
+---Aimbot Tab
+
+local AimbotTab = Window:CreateTab("Legit")
 
 local SilentAimSection = AimbotTab:CreateSection("Silent Aim")
 
@@ -229,11 +249,11 @@ local ThirdPersonToggle= SelfVisuals:CreateToggle("Enable ThirdPerson", nil, fun
 	ThirdPerson = State
 end)
 
-ThirdPersonToggle:CreateKeybind("Y", function(Key)
+ThirdPersonToggle:CreateKeybind("V", function(Key)
 end)
 
 local TPAmount = 0
-local TPSlider = SelfVisuals:CreateSlider("Amount", 0,50,nil,true, function(Value)
+local TPSlider = SelfVisuals:CreateSlider("Amount", 0,50,15,true, function(Value)
 	TPAmount = Value
 end)
 
@@ -882,6 +902,9 @@ spawn(function() --bt and breakhead
 	end
 end)
 
+local UserInputService = game:GetService("UserInputService")
+
+
 game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PLEASE KEEP IT FORMATED AND NOT MAKING RANDOM RENDERSTEP FUNCTIONS <3)
 	if ChamsEnabled then
 		turn_on()
@@ -930,7 +953,6 @@ game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PL
 			bodyname = 'Head'
 		end
 	end
-
 end)
 
 ----On start scripts
@@ -1066,13 +1088,20 @@ function gettarget()
 	return nearestcharacter
 end
 
+local function IsAlive(plr)
+	if plr and plr.Character and plr.Character.FindFirstChild(plr.Character, "Humanoid") and plr.Character.Humanoid.Health > 0 then
+		return true
+	end
+	return false
+end
+
 local Nospread = true
 mt.__namecall = newClose(function(...)
 	local method = namecallMethod()
 	local args = {...}
 	if method == "FindPartOnRayWithIgnoreList" then
 		if target and lplr.Character and RageBotEnable == true then 
-			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target.Head.CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target[HitpartSelectOption].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		elseif Nospread == true then
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		end
@@ -1085,6 +1114,9 @@ mt.__namecall = newClose(function(...)
 	return oldNamecall(unpack(args))
 end)
 
+local Arguments
+local LastShot = "Head"
+local Crouch =  UserInputService:IsKeyDown(Enum.KeyCode.C) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
 canshoot = true
 local cbClient = getsenv(LocalPlayer.PlayerGui:WaitForChild("Client"))
 game:GetService("RunService").RenderStepped:Connect(function() 
@@ -1095,30 +1127,81 @@ local yeet = gettarget()
 		target = nil
 	end
 	if RageBotEnable then
-		if BulletCheck(target) then
-			if canshoot then
-			canshoot = false
-			local Arguments = {
-				[1] = workspace[target.Name]["Head"],
-				[2] = workspace[target.Name]["Head"].Position,
-				[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
-				[4] = 100,
-				[5] = workspace[game.Players.LocalPlayer.Name].Gun,
-				[8] = 1,
-				[9] = false,
-				[10] = false,
-				[11] = Vector3.new(),
-				[12] = 100,
-				[13] = Vector3.new()
-				}
-			game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
-			cbClient.firebullet()
-			print("shot")
-			local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
-			wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
-			print("waited")
-			canshoot = true
-			end
+		if IsAlive(LocalPlayer) then
+			if BulletCheck(target) then
+				if canshoot then
+					canshoot = false
+					if BodyAimSelectOption == "Every Other shot" then
+					Arguments = {
+					[1] = workspace[target.Name][LastShot],
+					[2] = workspace[target.Name][LastShot].Position,
+					[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+					[4] = 100,
+					[5] = "Awp",
+					[8] = 1,
+					[9] = false,
+					[10] = false,
+					[11] = Vector3.new(),
+					[12] = 100,
+					[13] = Vector3.new()
+					}
+					elseif BodyAimSelectOption == "Double Tap" then
+					Arguments = {
+						[1] = workspace[target.Name]["UpperTorso"],
+						[2] = workspace[target.Name]["UpperTorso"].Position,
+						[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+						[4] = 100,
+						[5] = "Awp",
+						[8] = 1,
+						[9] = false,
+						[10] = false,
+						[11] = Vector3.new(),
+						[12] = 100,
+						[13] = Vector3.new()
+						}
+					else
+						Arguments = {
+							[1] = workspace[target.Name][HitpartSelectOption],
+							[2] = workspace[target.Name][HitpartSelectOption].Position,
+							[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+							[4] = 100,
+							[5] = "Awp",
+							[8] = 1,
+							[9] = false,
+							[10] = false,
+							[11] = Vector3.new(),
+							[12] = 100,
+							[13] = Vector3.new()
+							}
+					end
+					if ResloverEnable then
+						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+					end
+					cbClient.firebullet()
+					if BodyAimSelectOption ~= "None" then
+						if BodyAimSelectOption == "Every Other shot" then
+							if LastShot == "Head" then
+								LastShot = "UpperTorso" 
+							else
+								LastShot = "Head"
+							end
+						end
+					end
+					local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
+					wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
+					canshoot = true
+				end
+		end
+		else
+		canshoot = true
 		end
 	end
 end)
+
+
+
+
+
+
+
