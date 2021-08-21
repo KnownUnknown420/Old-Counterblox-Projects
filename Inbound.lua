@@ -20,7 +20,7 @@ local RageToggle =	Ragebot:CreateToggle("Enable", false, function(State)
 	RageBotEnable = State
 end)
 
-local ResloverEnable = false1
+local ResloverEnable = false
 local ResloverToggle =	Ragebot:CreateToggle("Enable Reslover", false, function(State)
 	ResloverEnable = State
 end)
