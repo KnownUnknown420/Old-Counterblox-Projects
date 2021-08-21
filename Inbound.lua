@@ -13,6 +13,13 @@ local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
 ----Aimbot Tab
 local AimbotTab = Window:CreateTab("Aimbot")
 
+local Ragebot = AimbotTab:CreateSection("Rage bot")
+
+local RageBotEnable = false
+local FovCircleToggle =	Ragebot:CreateToggle("Enable", false, function(State)
+	RageBotEnable = State
+end)
+
 local SilentAimSection = AimbotTab:CreateSection("Silent Aim")
 
 local SilentAimEnabled = false
@@ -57,7 +64,7 @@ end)
 local triggerbotsection = AimbotTab:CreateSection("Triggerbot")
 
 local TriggerbotEnable = false
-local triggerbottoggle = triggerbotsection:CreateToggle("Enable FOV Circle", false, function(State)
+local triggerbottoggle = triggerbotsection:CreateToggle("Enable", false, function(State)
 	TriggerbotEnable = State
 end)
 
@@ -221,6 +228,10 @@ local ThirdPerson = false
 local ThirdPersonToggle= SelfVisuals:CreateToggle("Enable ThirdPerson", nil, function(State)
 	ThirdPerson = State
 end)
+
+ThirdPersonToggle:CreateKeybind("Y", function(Key)
+end)
+
 local TPAmount = 0
 local TPSlider = SelfVisuals:CreateSlider("Amount", 0,50,nil,true, function(Value)
 	TPAmount = Value
@@ -469,7 +480,6 @@ local chams = function()
 						for _, part in pairs(v.Character:GetChildren()) do
 							if part:IsA('BasePart') then
 								if part:FindFirstChildOfClass("SpecialMesh") then
-									print("")
 								else
 									local adorn = Instance.new('BoxHandleAdornment',folder)
 									adorn.Name = v.Name
@@ -736,7 +746,6 @@ local function beam(part,pos,yeeet)
 	end
 end
 
-
 function gettarget()
 	local nearestmag = SilentAimFOV
 	local nearestcharacter = nil
@@ -922,4 +931,194 @@ game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PL
 		end
 	end
 
+end)
+
+----On start scripts
+
+-- Viewmodels fix
+for i,v in pairs(game.ReplicatedStorage.Viewmodels:GetChildren()) do
+    if v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Transparency ~= 1 then
+        v.HumanoidRootPart.Transparency = 1
+    end
+end
+
+game.ReplicatedStorage.Viewmodels["v_oldM4A1-S"].Silencer.Transparency = 1
+local fix = game.ReplicatedStorage.Viewmodels["v_oldM4A1-S"].Silencer:Clone()
+fix.Parent = game.ReplicatedStorage.Viewmodels["v_oldM4A1-S"]
+fix.Name = "Silencer2"
+fix.Transparency = 0
+
+
+
+
+
+
+local lplr = game:GetService("Players").LocalPlayer
+local m = lplr:GetMouse()
+
+local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+local oldIndex = mt.__index
+if setreadonly then setreadonly(mt, false) else make_writeable(mt, true) end
+local namecallMethod = getnamecallmethod or get_namecall_method
+local newClose = newcclosure or function(f) return f end
+local target;
+local latestshot = nil
+local bodyname = 'Head'
+local cangivecframe = 0
+local fakeanim = Instance.new('Animation',workspace)
+fakeanim.AnimationId = 'rbxassetid://0'
+
+local Camera = workspace.CurrentCamera
+local FindFirstChild = game.FindFirstChild
+local WaitForChild = game.WaitForChild
+local IsDescendantOf = game.IsDescendantOf
+local FindPartOnRayWithWhitelist = workspace.FindPartOnRayWithWhitelist
+local LocalPlayer = game.Players.LocalPlayer
+local Client = getsenv(LocalPlayer.PlayerGui.Client)
+
+local function BulletCheck(Character)
+    repeat
+        wait()
+    until Client.gun ~= "none" or typeof(Client.gun) == "Instance"
+    local IgnoreList = {Camera, LocalPlayer.Character, workspace.Debris, workspace.Ray_Ignore, WaitForChild(workspace.Map, "Clips"), WaitForChild(workspace.Map, "SpawnPoints")}
+    local GunPen, GunRange
+    GunPen = FindFirstChild(Client.gun, "Penetration") and Client.gun.Penetration.Value * 0.01 or GunPen
+    GunRange = FindFirstChild(Client.gun, "Range") and Client.gun.Range.Value or GunRange
+    local Direction = CFrame.new(Camera.CFrame.Position, Character.Head.Position).LookVector.Unit * GunRange * 0.0694
+    local RayCasted = Ray.new(Camera.CFrame.Position, Direction)
+    local NegativeCasted = Ray.new(Character.Head.Position, -Direction)
+    local Limit = 0
+    local Depth = 0
+    for I,V in pairs(Camera:GetPartsObscuringTarget({Character.Head.Position}, IgnoreList)) do
+        local PartModifier = 1
+        if V.Material == Enum.Material.DiamondPlate then
+            PartModifier = 3
+        end
+        if V.Material == Enum.Material.CorrodedMetal or V.Material == Enum.Material.Metal or V.Material == V.Material == Enum.Material.Concrete or V.Material == Enum.Material.Brick then
+            PartModifier = 2
+        end
+        if V.Name == "Grate" or V.Material == Enum.Material.Wood or V.Material == Enum.Material.WoodPlanks or V.Parent and FindFirstChild(V.Parent, "Humanoid") then
+            PartModifier = 0.1
+        end
+        if V.Transparency == 1 or not V.CanCollide or V.Name == "Glass" or V.Name == "Cardboard" or IsDescendantOf(V, workspace.Ray_Ignore) or IsDescendantOf(V, workspace.Debris) or V.Parent and V.Parent.Name == "Hitboxes" then
+            PartModifier = 0
+        end
+        if V.Name == "nowallbang" then
+            PartModifier = 100
+        end
+        if FindFirstChild(V, "PartModifier") then
+            PartModifier = V.PartModifier.Value
+        end
+        local _, Pos1 = FindPartOnRayWithWhitelist(workspace, RayCasted, {V})
+        local _, Pos2 = FindPartOnRayWithWhitelist(workspace, NegativeCasted, {V})
+        if Pos1 and Pos2 then
+            local Magnitude = (Pos2 - Pos1).Magnitude
+            Magnitude = Magnitude * PartModifier
+            Limit = math.min(GunPen, Limit + Magnitude)
+            Depth = Depth + Magnitude
+        end
+    end
+    return Depth <= Limit
+end
+
+
+function gettarget()
+	local nearestmag = 5000
+	local nearestcharacter = nil
+	pcall(function()
+		local lplr = game:GetService("Players").LocalPlayer
+		local t = nil
+		local m = lplr:GetMouse()
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character and plr.Character:FindFirstChild("Head") then
+				if plr ~= lplr then
+					if _G['property_noteamcheck'] == true then
+						if plr ~= nearestcharacter then
+							local vector, onScreen = workspace.CurrentCamera:WorldToScreenPoint(plr.Character.Head.CFrame.p)
+							local dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
+							if dist < nearestmag then
+								if 0 < plr.Character.Humanoid.Health then
+									nearestcharacter = plr.Character
+									nearestmag = dist
+								end
+							end
+						end
+					else
+						if plr.TeamColor ~= lplr.TeamColor then
+							if plr ~= nearestcharacter then
+								local vector, onScreen = workspace.CurrentCamera:WorldToScreenPoint(plr.Character.Head.CFrame.p)
+								local dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
+								if dist < nearestmag then
+									if 0 < plr.Character.Humanoid.Health then
+										nearestcharacter = plr.Character
+										nearestmag = dist
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
+	return nearestcharacter
+end
+
+local Nospread = true
+mt.__namecall = newClose(function(...)
+	local method = namecallMethod()
+	local args = {...}
+	if method == "FindPartOnRayWithIgnoreList" then
+		if target and lplr.Character and RageBotEnable == true then 
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target.Head.CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		elseif Nospread == true then
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		end
+	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
+		return wait(99e99)
+	elseif tostring(method) == "FireServer" and string.find(tostring(args[1]),'{') then
+		return wait(99e99)
+	end
+	-- bypass end
+	return oldNamecall(unpack(args))
+end)
+
+canshoot = true
+local cbClient = getsenv(LocalPlayer.PlayerGui:WaitForChild("Client"))
+game:GetService("RunService").RenderStepped:Connect(function() 
+local yeet = gettarget()
+	if yeet then
+		target = yeet
+	else
+		target = nil
+	end
+	if RageBotEnable then
+		if BulletCheck(target) then
+			if canshoot then
+			canshoot = false
+			local Arguments = {
+				[1] = workspace[target.Name]["Head"],
+				[2] = workspace[target.Name]["Head"].Position,
+				[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+				[4] = 100,
+				[5] = workspace[game.Players.LocalPlayer.Name].Gun,
+				[8] = 1,
+				[9] = false,
+				[10] = false,
+				[11] = Vector3.new(),
+				[12] = 100,
+				[13] = Vector3.new()
+				}
+			game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+			cbClient.firebullet()
+			print("shot")
+			local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
+			wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
+			print("waited")
+			canshoot = true
+			end
+		end
+	end
 end)
