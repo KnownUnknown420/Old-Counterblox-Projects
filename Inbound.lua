@@ -6,7 +6,7 @@ local Config = {
 	Keybind = Enum.KeyCode.Insert
 }
 
-
+local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pawel12d/hexagon/main/scripts/ESP.lua"))()
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
 local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
 
@@ -34,6 +34,49 @@ HitpartSelect:SetOption("Head")
 local BodyAimSelectOption = "None"
 local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot","Double Tap",}, function(String)
 	BodyAimSelectOption = String
+end)
+
+local AntiAimSection = RageTab:CreateSection("Anti Aim")
+
+local AntiAimEnable = false
+local AntiAimToggle = AntiAimSection:CreateToggle("Enable Antiaim", false, function(State)
+	AntiAimEnable = State
+end)
+
+local HeadDisable = false
+local HeadDisableToggle = AntiAimSection:CreateToggle("Break Head", false, function(State)
+	HeadDisable = State
+end)
+
+local DisableAnimations = false
+local AnitAnimations = AntiAimSection:CreateToggle("Disable Animations", false, function(State)
+	DisableAnimations = State
+end)
+
+local PitchSelectOption = "Default"
+local PitchSlect = AntiAimSection:CreateDropdown("Pitch", {"Jitter", "Reversed", "Manual", "Spin"}, function(String)
+	PitchSelectOption = String
+end)
+PitchSlect:SetOption("Default")
+
+local AntiAimDown = false
+local DownToggle = AntiAimSection:CreateToggle("Head Down", false, function(State)
+	AntiAimDown = State
+end)
+
+local Downscale = 0
+local YawManualSlider = AntiAimSection:CreateSlider("DownScale", 0,10, 0 ,true, function(Value)
+	Downscale = Value
+end)
+
+local aaspeed = 0
+local AASpeedSlider = AntiAimSection:CreateSlider("Spin Speed", 0,100, 50 ,true, function(Value)
+	aaspeed = Value
+end)
+
+local aasmooth = 0
+local AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 ,true, function(Value)
+	aasmooth = Value
 end)
 
 ---Aimbot Tab
@@ -122,32 +165,57 @@ end)
 ----ESP Tab
 local ESPTab = Window:CreateTab("ESP")
 
-local BoxESP = ESPTab:CreateSection("Box ESP")
+local BoxESP = ESPTab:CreateSection("ESP Settings")
 
-local EnableEsp = false
-local EspToggle = BoxESP:CreateToggle("Enable", nil, function(State)
-	EnableEsp = State
+ESP.Tracers = false
+ESP.ShowTeam = false
+ESP.UseTeamColor = false
+ESP.Enabled = false
+local EspToggle = BoxESP:CreateToggle("Enable", false, function(State)
+	ESP.Enabled = State
 end)
 
-local EnemyEnable = false
-local EspEnemyToggle =	BoxESP:CreateToggle("Enemy", nil, function(State)
-	EnemyEnable = State
+ESP.ShowTeam = false
+local EspTeamToggle =	BoxESP:CreateToggle("Show Team", false, function(State)
+	ESP.ShowTeam = State
 end)
 
-local TeamEnable = false
-local EspTeamToggle =	BoxESP:CreateToggle("Teammates", nil, function(State)
-	TeamEnable = State
+ESP.Boxes = false
+local EspBoxesToggle =	BoxESP:CreateToggle("Show Boxes", false, function(State)
+	ESP.Boxes = State
 end)
 
-local EnemyEspColor = Color3.fromHSV(0, 0, 1)
+ESP.EnemyColor = Color3.fromHSV(0, 0, 1)
 local ESPColorPicker = BoxESP:CreateColorpicker("Enemy Color", function(Color)
-	EnemyEspColor = Color
+	ESP.EnemyColor= Color
 end)
 
-local TeamEspColor = Color3.fromHSV(0, 0, 1)
+ESP.TeamColor = Color3.fromHSV(0, 0, 1)
 local ESPColorPickerTeam = BoxESP:CreateColorpicker("Team Color", function(Color)
-	TeamEspColor = Color
+	ESP.TeamColor = Color
+end)
 
+local InfoSection = ESPTab:CreateSection("Player Info")
+
+ESP.ShowInfo = false
+local EspInfoToggle = InfoSection:CreateToggle("Enable Info", false, function(State)
+	ESP.ShowInfo = State
+end)
+
+local NameToggle = InfoSection:CreateToggle("Show Name", false, function(State)
+	ESP.Info.Name = State
+end)
+
+local HealthToggle = InfoSection:CreateToggle("Show Health", false, function(State)
+	ESP.Info.Health = State
+end)
+
+local WeaponsToggle = InfoSection:CreateToggle("Show Weapons", false, function(State)
+	ESP.Info.Weapons = State
+end)
+
+local DistanceToggle = InfoSection:CreateToggle("Show Distance", false, function(State)
+	ESP.Info.Distance = State
 end)
 
 local Chams = ESPTab:CreateSection("Chams")
@@ -311,137 +379,13 @@ ToggleButtonUI:SetState(true)
 
 ----Scripts
 
---ESP
-local Player  = game:GetService("Players").LocalPlayer
-local Camera = game:GetService("Workspace").CurrentCamera
-local Mouse = Player:GetMouse()
-
-local function DrawESP(plr)
-	local Box = Drawing.new("Quad")
-	Box.Visible = false
-	Box.PointA = Vector2.new(0, 0)
-	Box.PointB = Vector2.new(0, 0)
-	Box.PointC = Vector2.new(0, 0)
-	Box.PointD = Vector2.new(0, 0)
-	Box.Color = Color3.fromRGB(255, 255, 255)
-	Box.Thickness = 1
-	Box.Transparency = 1
-
-	local function Update()
-		local c
-		c = game:GetService("RunService").RenderStepped:Connect(function()
-			if plr.Character ~= nil and plr.Character:FindFirstChildOfClass("Humanoid") ~= nil and plr.Character.PrimaryPart ~= nil and plr.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-				local pos, vis = Camera:WorldToViewportPoint(plr.Character.PrimaryPart.Position)
-				if vis then 
-					local points = {}
-					local c = 0
-					for _,v in pairs(plr.Character:GetChildren()) do
-						if v:IsA("BasePart") then
-							c = c + 1
-							local p, vis = Camera:WorldToViewportPoint(v.Position)
-							if v == plr.Character.PrimaryPart then
-								p, vis = Camera:WorldToViewportPoint((v.CFrame * CFrame.new(0, 0, -v.Size.Z)).p)
-							elseif v.Name == "Head" then
-								p, vis = Camera:WorldToViewportPoint((v.CFrame * CFrame.new(0, v.Size.Y/2, v.Size.Z/1.25)).p)
-							elseif string.match(v.Name, "Left") then
-								p, vis = Camera:WorldToViewportPoint((v.CFrame * CFrame.new(-v.Size.X/2, 0, 0)).p)
-							elseif string.match(v.Name, "Right") then
-								p, vis = Camera:WorldToViewportPoint((v.CFrame * CFrame.new(v.Size.X/2, 0, 0)).p)
-							end
-							points[c] = {p, vis}
-						end
-					end
-
-					local TopY = math.huge
-					local DownY = -math.huge
-					local LeftX = math.huge
-					local RightX = -math.huge
-
-					local Left
-					local Right
-					local Top
-					local Bottom
-
-					local closest = nil
-					for _,v in pairs(points) do
-						if v[2] == true then
-							local p = v[1]
-							if p.Y < TopY then
-								Top = p
-								TopY = p.Y
-							end
-							if p.Y > DownY then
-								Bottom = p
-								DownY = p.Y
-							end
-							if p.X > RightX then
-								Right = p
-								RightX = p.X
-							end
-							if p.X < LeftX then
-								Left = p
-								LeftX = p.X
-							end
-						end
-					end
-
-					if Left ~= nil and Right ~= nil and Top ~= nil and Bottom ~= nil then
-						Box.PointA = Vector2.new(Right.X, Top.Y)
-						Box.PointB = Vector2.new(Left.X, Top.Y)
-						Box.PointC = Vector2.new(Left.X, Bottom.Y)
-						Box.PointD = Vector2.new(Right.X, Bottom.Y)
-
-						Box.Visible = true
-					else 
-						Box.Visible = false
-					end
-
-					Box.Color = EnemyEspColor
-
-					if EnableEsp then
-						if EnemyEnable then
-							Box.Visible = true
-						else
-							Box.Visible = false
-						end
-					else
-						Box.Visible = false
-					end
-
-					if EnableEsp then
-						if plr.Team == Player.Team then
-							if TeamEnable then
-								Box.Visible = true
-								Box.Color = TeamEspColor
-							else
-								Box.Visible = false
-							end
-						end
-					end
-
-				else 
-					Box.Visible = false
-				end				
-			else
-				Box.Visible = false
-				if game.Players:FindFirstChild(plr.Name) == nil then
-					c:Disconnect()
-				end
-			end
-		end)
+local function IsAlive(plr)
+	if plr and plr.Character and plr.Character.FindFirstChild(plr.Character, "Humanoid") and plr.Character.Humanoid.Health > 0 then
+		return true
 	end
-	coroutine.wrap(Update)()
-end
 
-for _,v in pairs(game:GetService("Players"):GetChildren()) do
-	if v.Name ~= Player.Name then 
-		DrawESP(v)
-	end
+	return false
 end
-
-game:GetService("Players").PlayerAdded:Connect(function(v)
-	DrawESP(v)
-end)
 
 local players = game:GetService('Players')
 local player = players.LocalPlayer
@@ -850,6 +794,34 @@ mt.__namecall = newClose(function(...)
 end)
 
 
+function nameesp(character)
+	if not character:FindFirstChild("name_ESP") then
+		local name_ESP = Instance.new("BillboardGui")
+		local NAME = Instance.new("TextLabel")
+		name_ESP.Name = "name_ESP"
+		name_ESP.Parent = character
+		name_ESP.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		name_ESP.Active = true
+		name_ESP.Adornee = character.Head
+		name_ESP.AlwaysOnTop = true
+		name_ESP.ExtentsOffset = Vector3.new(0, 2, 0)
+		name_ESP.LightInfluence = 1
+		name_ESP.Size = UDim2.new(0, 200, 0, 50)
+		
+		NAME.Name = "NAME"
+		NAME.Parent = name_ESP
+		NAME.BackgroundColor3 = Color3.new(1, 1, 1)
+		NAME.BackgroundTransparency = 1
+		NAME.Size = UDim2.new(0, 200, 0, 25)
+		NAME.Font = Enum.Font.SourceSansSemibold
+		NAME.Text = character.Name
+		NAME.TextColor3 = Color3.new(1, 1, 1)
+		NAME.TextSize = 12
+		NAME.TextStrokeTransparency = 0.30000001192093
+		NAME.TextWrapped = true
+	end
+end
+
 
 
 ----Loops
@@ -876,7 +848,7 @@ spawn(function() --Triggerbot
 	end
 end)
 
-spawn(function() --bt and breakhead
+spawn(function() --bt 
 	while wait(0.7) do
 		for _,player in pairs(game.Players:GetPlayers()) do
 			if player.Character then
@@ -888,14 +860,19 @@ spawn(function() --bt and breakhead
 							player.Character:FindFirstChild("backtrack"):Destroy()
 							backtrackfolder:ClearAllChildren()
 						end
+						if NameESP  then
+							nameesp(player.Character)
+						elseif player.Character:FindFirstChild("name_ESP") then
+							player.Character:FindFirstChild("name_ESP"):Destroy()
+						end
 					end
-				end
-			else
-				if _G['property_antiheadshot'] == true then
-					pcall(function()
-						game.Players.LocalPlayer.Character:FindFirstChild('FakeHead'):Destroy()
-						game.Players.LocalPlayer.Character:FindFirstChild('HeadHB'):Destroy()
-					end)
+				else
+					if HeadDisable then
+						pcall(function()
+							game.Players.LocalPlayer.Character:FindFirstChild('FakeHead'):Destroy()
+							game.Players.LocalPlayer.Character:FindFirstChild('HeadHB'):Destroy()
+						end)
+					end
 				end
 			end
 		end
@@ -1046,8 +1023,8 @@ local function BulletCheck(Character)
 end
 
 
-function gettarget()
-	local nearestmag = 5000
+function gettargetrage()
+	local nearestmag = math.huge
 	local nearestcharacter = nil
 	pcall(function()
 		local lplr = game:GetService("Players").LocalPlayer
@@ -1088,20 +1065,17 @@ function gettarget()
 	return nearestcharacter
 end
 
-local function IsAlive(plr)
-	if plr and plr.Character and plr.Character.FindFirstChild(plr.Character, "Humanoid") and plr.Character.Humanoid.Health > 0 then
-		return true
-	end
-	return false
-end
 
+
+local RageTarget
+local canshoot = true
 local Nospread = true
 mt.__namecall = newClose(function(...)
 	local method = namecallMethod()
 	local args = {...}
 	if method == "FindPartOnRayWithIgnoreList" then
-		if target and lplr.Character and RageBotEnable == true then 
-			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target[HitpartSelectOption].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		if RageTarget and lplr.Character and RageBotEnable == true and not canshoot then 
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (RageTarget[HitpartSelectOption].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		elseif Nospread == true then
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		end
@@ -1117,24 +1091,24 @@ end)
 local Arguments
 local LastShot = "Head"
 local Crouch =  UserInputService:IsKeyDown(Enum.KeyCode.C) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
-canshoot = true
+
 local cbClient = getsenv(LocalPlayer.PlayerGui:WaitForChild("Client"))
 game:GetService("RunService").RenderStepped:Connect(function() 
-local yeet = gettarget()
+local yeet = gettargetrage()
 	if yeet then
-		target = yeet
+		RageTarget = yeet
 	else
-		target = nil
+		RageTarget = nil
 	end
 	if RageBotEnable then
 		if IsAlive(LocalPlayer) then
-			if BulletCheck(target) then
+			if BulletCheck(RageTarget) then
 				if canshoot then
 					canshoot = false
 					if BodyAimSelectOption == "Every Other shot" then
 					Arguments = {
-					[1] = workspace[target.Name][LastShot],
-					[2] = workspace[target.Name][LastShot].Position,
+					[1] = workspace[RageTarget.Name][LastShot],
+					[2] = workspace[RageTarget.Name][LastShot].Position,
 					[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
 					[4] = 100,
 					[5] = "Awp",
@@ -1147,8 +1121,8 @@ local yeet = gettarget()
 					}
 					elseif BodyAimSelectOption == "Double Tap" then
 					Arguments = {
-						[1] = workspace[target.Name]["UpperTorso"],
-						[2] = workspace[target.Name]["UpperTorso"].Position,
+						[1] = workspace[RageTarget.Name]["UpperTorso"],
+						[2] = workspace[RageTarget.Name]["UpperTorso"].Position,
 						[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
 						[4] = 100,
 						[5] = "Awp",
@@ -1161,8 +1135,8 @@ local yeet = gettarget()
 						}
 					else
 						Arguments = {
-							[1] = workspace[target.Name][HitpartSelectOption],
-							[2] = workspace[target.Name][HitpartSelectOption].Position,
+							[1] = workspace[RageTarget.Name][HitpartSelectOption],
+							[2] = workspace[RageTarget.Name][HitpartSelectOption].Position,
 							[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
 							[4] = 100,
 							[5] = "Awp",
@@ -1175,7 +1149,6 @@ local yeet = gettarget()
 							}
 					end
 					if ResloverEnable then
-						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
 						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
 					end
 					cbClient.firebullet()
@@ -1200,8 +1173,76 @@ local yeet = gettarget()
 end)
 
 
+function characterrotate(pos)
+	pcall(function()
+		if game.Players.LocalPlayer.Character then
+			game.Players.LocalPlayer.Character.Humanoid.AutoRotate = false
+			local gyro = Instance.new('BodyGyro')
+			gyro.D = (aasmooth or 0)
+			gyro.P = 1000000
+			gyro.MaxTorque = Vector3.new(0, 1000000, 0)
+			gyro.Parent = game.Players.LocalPlayer.Character.UpperTorso
+			gyro.CFrame = CFrame.new(gyro.Parent.Position,  pos)
+			wait()
+			gyro:Destroy()
+		end
+	end)
+end
 
+local leftrotation = CFrame.new(-150,0,0)
+local rightrotation = CFrame.new(150,0,0)
+local backrotation = CFrame.new(-4,0,0)
+local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
 
+_G.keydownawsd = 'a'
+game:GetService("RunService").RenderStepped:Connect(function()
+	if AntiAimEnable == true then
+		if  PitchSelectOption == 'Keybind' then
+			if _G.keydownawsd == 'a' then
+				characterrotate((workspace.CurrentCamera.CFrame * rightrotation).p)
+			elseif _G.keydownawsd == 'w' or 's' then
+				characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
+			elseif _G.keydownawsd == 'd' then
+				characterrotate((workspace.CurrentCamera.CFrame * leftrotation).p)
+			end
+		elseif PitchSelectOption == 'Manual' then
+			characterrotate((workspace.CurrentCamera.CFrame * CFrame.new(YawManualhValue - 150,0,0)).p)
+		elseif PitchSelectOption== 'Reversed' then
+			characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
+		elseif PitchSelectOption == 'Jitter' then
+			if game.Players.LocalPlayer.Character then
+				game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
+				local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
+				spin.AngularVelocity = Vector3.new(0, math.random(-60000,55000), 0)
+				spin.MaxTorque = Vector3.new(0, 35000, 0)
+				wait()
+				spin:Destroy()
+			end
+		elseif PitchSelectOption == 'Spin' then
+			if game.Players.LocalPlayer.Character then
+				game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
+				local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
+				spin.AngularVelocity = Vector3.new(0, aaspeed, 0)
+				spin.MaxTorque = Vector3.new(0, 23000, 0)
+				wait()
+				spin:Destroy()
+			end
+		end
+	elseif game.Players.LocalPlayer.Character then
+		game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = true
+	end
 
+	if AntiAimDown then
+		game.ReplicatedStorage.Events.ControlTurn:FireServer(-((Downscale*0.05) + 0.96247750520706))
+	end
+end)
 
-
+local keyboard = game:GetService("Players").LocalPlayer:GetMouse()
+keyboard.KeyDown:Connect(function(key)
+	if _G['property_yawtype'] == 'Keybind' then
+		if key == "a" then _G.keydownawsd = 'a' end
+		if key == "w" then _G.keydownawsd = 'w' end
+		if key == "s" then _G.keydownawsd = 's' end
+		if key == "d" then _G.keydownawsd = 'd' end
+	end
+end)
