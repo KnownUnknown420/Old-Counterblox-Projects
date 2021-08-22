@@ -87,10 +87,22 @@ local AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 
 	aasmooth = Value
 end)
 
-local CrimwalkEnable = false
-local CrimWalkToggle = AntiAimSection:CreateToggle("CrimWalk ;)", false, function(State)
-	CrimwalkEnable = State
-end)
+--[[local Crimwalk = AntiAimSection:CreateButton("CrimWalk ;)", function()
+	local lplr = game:GetService("Players").LocalPlayer
+if lplr.Character and not lplr:FindFirstChild('XDDLA') then
+	Instance.new('Sky',lplr.Character).Name = 'XDDLA'
+	local baby = lplr.Character
+	while baby.Parent == workspace do 
+		delay(0,function()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.Head.Position + Vector3.new(0,-30,0)
+			cameraoffset = false
+		end)
+		wait()
+	end
+end
+end)--]]
+	
+
 
 ---Aimbot Tab
 
@@ -1062,9 +1074,9 @@ local canshoot = true
 
 local Arguments
 local LastShot = "Head"
-local Crouch =  UserInputService:IsKeyDown(Enum.KeyCode.C) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
 
-local cbClient = getsenv(LocalPlayer.PlayerGui:WaitForChild("Client"))
+
+
 
 game:GetService("RunService").RenderStepped:Connect(function() 
 local yeet = gettargetrage()
@@ -1087,7 +1099,7 @@ local yeet = gettargetrage()
 					[5] = "Awp",
 					[8] = 1,
 					[9] = false,
-					[10] = false,
+					[10] = true,
 					[11] = Vector3.new(),
 					[12] = 100,
 					[13] = Vector3.new()
@@ -1101,7 +1113,7 @@ local yeet = gettargetrage()
 						[5] = "Awp",
 						[8] = 1,
 						[9] = false,
-						[10] = false,
+						[10] = true,
 						[11] = Vector3.new(),
 						[12] = 100,
 						[13] = Vector3.new()
@@ -1115,7 +1127,7 @@ local yeet = gettargetrage()
 							[5] = "Awp",
 							[8] = 1,
 							[9] = false,
-							[10] = false,
+							[10] = true,
 							[11] = Vector3.new(),
 							[12] = 100,
 							[13] = Vector3.new()
@@ -1193,8 +1205,8 @@ game:GetService("RunService").RenderStepped:Connect(function()
 			if game.Players.LocalPlayer.Character then
 				game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
 				local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
-				spin.AngularVelocity = Vector3.new(0, aaspeed, 0)
-				spin.MaxTorque = Vector3.new(0, 23000, 0)
+				spin.AngularVelocity = Vector3.new(0, aaspeed , 0)
+				spin.MaxTorque = Vector3.new(0, 50000, 0)
 				wait()
 				spin:Destroy()
 			end
@@ -1224,7 +1236,7 @@ local isBhopping = false
 local Minvalue = BhopAmount
 local MaxValue = BhopAmount
 local Acceleration = BhopAmount
-print("locals")
+
 
 local function CharacterAdded()
 	wait(0.5)
@@ -1251,7 +1263,7 @@ local function CharacterAdded()
 	end
 end
 
-print("Char function")
+
 
 oldNewIndex = hookfunc(getrawmetatable(game.Players.LocalPlayer.PlayerGui.Client).__newindex, newcclosure(function(self, idx, val)
 	if not checkcaller() then
@@ -1275,22 +1287,4 @@ end)
 
 
 
---[[local lplr = game:GetService("Players").LocalPlayer
-if lplr.Character and not lplr:FindFirstChild('XDDLA') then
-	Instance.new('Sky',lplr.Character).Name = 'XDDLA'
-	local baby = lplr.Character
-	while baby.Parent == workspace do 
-		delay(0,function()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(-10,0,0)
-			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(-10,0,0)
-			cameraoffset = false
-		end)
-		wait()
-		delay(0,function()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.Head.Position + Vector3.new(0,-1.5,0)
-			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.Head.Position + Vector3.new(0,1.5,0)
-			cameraoffset = false
-		end)
-		wait()
-	end
-end--]]
+
