@@ -20,10 +20,21 @@ local RageToggle =	Ragebot:CreateToggle("Enable", false, function(State)
 	RageBotEnable = State
 end)
 
-local ResloverEnable = false
-local ResloverToggle =	Ragebot:CreateToggle("Enable Reslover", false, function(State)
-	ResloverEnable = State
+local InstantKill = false
+local InstantKillToggle = Ragebot:CreateToggle("Instant Kill", false, function(State)
+	InstantKill = State
 end)
+
+local Nospread = false
+local NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
+	Nospread = State
+end)
+
+local TargetType = "Closest from Mouse"
+local TargetSelect = Ragebot:CreateDropdown("Targeting Method", {"Closest from Mouse","Closest from player"}, function(String)
+	TargetType = String
+end)
+TargetSelect:SetOption("Closest from Mouse")
 
 local HitpartSelectOption = "Head"
 local HitpartSelect = Ragebot:CreateDropdown("Hit Boxes", {"Head","UpperTorso"}, function(String)
@@ -35,6 +46,8 @@ local BodyAimSelectOption = "None"
 local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot","Double Tap",}, function(String)
 	BodyAimSelectOption = String
 end)
+
+
 
 local AntiAimSection = RageTab:CreateSection("Anti Aim")
 
@@ -48,13 +61,8 @@ local HeadDisableToggle = AntiAimSection:CreateToggle("Break Head", false, funct
 	HeadDisable = State
 end)
 
-local DisableAnimations = false
-local AnitAnimations = AntiAimSection:CreateToggle("Disable Animations", false, function(State)
-	DisableAnimations = State
-end)
-
 local PitchSelectOption = "Default"
-local PitchSlect = AntiAimSection:CreateDropdown("Pitch", {"Jitter", "Reversed", "Manual", "Spin"}, function(String)
+local PitchSlect = AntiAimSection:CreateDropdown("Pitch", {"Jitter", "Reversed", "Keybind", "Spin"}, function(String)
 	PitchSelectOption = String
 end)
 PitchSlect:SetOption("Default")
@@ -65,7 +73,7 @@ local DownToggle = AntiAimSection:CreateToggle("Head Down", false, function(Stat
 end)
 
 local Downscale = 0
-local YawManualSlider = AntiAimSection:CreateSlider("DownScale", 0,10, 0 ,true, function(Value)
+local YawManualSlider = AntiAimSection:CreateSlider("DownScale", 0,15, 0 ,true, function(Value)
 	Downscale = Value
 end)
 
@@ -77,6 +85,11 @@ end)
 local aasmooth = 0
 local AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 ,true, function(Value)
 	aasmooth = Value
+end)
+
+local CrimwalkEnable = false
+local CrimWalkToggle = AntiAimSection:CreateToggle("CrimWalk ;)", false, function(State)
+	CrimwalkEnable = State
 end)
 
 ---Aimbot Tab
@@ -364,6 +377,18 @@ end)
 
 ----MiscTab
 local MiscTab = Window:CreateTab("Misc")
+
+local BhopSettings = MiscTab:CreateSection("Bhop")
+
+local EnableBhop = false
+local BhopToggle = BhopSettings:CreateToggle("Enable", nil, function(State)
+	EnableBhop = State
+end)
+
+local BhopAmount = 25
+local BhopAmountSlider = BhopSettings:CreateSlider("Amount", 0,50,25,true, function(Value)
+	BhopAmount = Value
+end)
 
 local UiSettings = MiscTab:CreateSection("Ui Settings")
 
@@ -759,11 +784,11 @@ mt.__namecall = newClose(function(...)
 		table.insert(args[3],backtrackfolder)
 		if target and lplr.Character and SilentAimEnabled == true then 
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target[bodyname].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
-		elseif _G['property_nospread'] == true then
+		elseif Nospread == true then
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		end
 	elseif tostring(method) == "FireServer" and tostring(args[1]) == "HitPart" then
-		if _G['property_instantkill'] == true then
+		if InstantKill  then
 			args[9] = 10
 		end
 		if m.Target and m.Target.Name == 'backtrackPART' and 0 < m.Target.thing.Value.Humanoid.Health then
@@ -782,7 +807,7 @@ mt.__namecall = newClose(function(...)
 					beam(args[2],args[3],lplr.Character.Head.CFrame.p)
 				end
 			end)
-		end
+	end
 		-- bypass start
 	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
 		return wait(99e99)
@@ -860,11 +885,6 @@ spawn(function() --bt
 							player.Character:FindFirstChild("backtrack"):Destroy()
 							backtrackfolder:ClearAllChildren()
 						end
-						if NameESP  then
-							nameesp(player.Character)
-						elseif player.Character:FindFirstChild("name_ESP") then
-							player.Character:FindFirstChild("name_ESP"):Destroy()
-						end
 					end
 				else
 					if HeadDisable then
@@ -882,7 +902,7 @@ end)
 local UserInputService = game:GetService("UserInputService")
 
 
-game:GetService("RunService").RenderStepped:Connect(function() ----MAIN LOOP (PLEASE KEEP IT FORMATED AND NOT MAKING RANDOM RENDERSTEP FUNCTIONS <3)
+game:GetService("RunService").RenderStepped:Connect(function() 
 	if ChamsEnabled then
 		turn_on()
 	else
@@ -947,28 +967,6 @@ fix.Parent = game.ReplicatedStorage.Viewmodels["v_oldM4A1-S"]
 fix.Name = "Silencer2"
 fix.Transparency = 0
 
-
-
-
-
-
-local lplr = game:GetService("Players").LocalPlayer
-local m = lplr:GetMouse()
-
-local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
-local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
-local oldIndex = mt.__index
-if setreadonly then setreadonly(mt, false) else make_writeable(mt, true) end
-local namecallMethod = getnamecallmethod or get_namecall_method
-local newClose = newcclosure or function(f) return f end
-local target;
-local latestshot = nil
-local bodyname = 'Head'
-local cangivecframe = 0
-local fakeanim = Instance.new('Animation',workspace)
-fakeanim.AnimationId = 'rbxassetid://0'
-
 local Camera = workspace.CurrentCamera
 local FindFirstChild = game.FindFirstChild
 local WaitForChild = game.WaitForChild
@@ -1021,7 +1019,7 @@ local function BulletCheck(Character)
     end
     return Depth <= Limit
 end
-
+local dist
 
 function gettargetrage()
 	local nearestmag = math.huge
@@ -1033,27 +1031,18 @@ function gettargetrage()
 		for _, plr in pairs(game.Players:GetPlayers()) do
 			if plr.Character and plr.Character:FindFirstChild("Head") then
 				if plr ~= lplr then
-					if _G['property_noteamcheck'] == true then
+					if plr.TeamColor ~= lplr.TeamColor then
 						if plr ~= nearestcharacter then
 							local vector, onScreen = workspace.CurrentCamera:WorldToScreenPoint(plr.Character.Head.CFrame.p)
-							local dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
+							if TargetType == "Closest from Mouse" then
+								dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
+							else
+								dist = (plr.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).magnitude
+							end
 							if dist < nearestmag then
 								if 0 < plr.Character.Humanoid.Health then
 									nearestcharacter = plr.Character
 									nearestmag = dist
-								end
-							end
-						end
-					else
-						if plr.TeamColor ~= lplr.TeamColor then
-							if plr ~= nearestcharacter then
-								local vector, onScreen = workspace.CurrentCamera:WorldToScreenPoint(plr.Character.Head.CFrame.p)
-								local dist = (Vector2.new(vector.X, vector.Y) - Vector2.new(m.X,m.Y)).Magnitude
-								if dist < nearestmag then
-									if 0 < plr.Character.Humanoid.Health then
-										nearestcharacter = plr.Character
-										nearestmag = dist
-									end
 								end
 							end
 						end
@@ -1069,30 +1058,14 @@ end
 
 local RageTarget
 local canshoot = true
-local Nospread = true
-mt.__namecall = newClose(function(...)
-	local method = namecallMethod()
-	local args = {...}
-	if method == "FindPartOnRayWithIgnoreList" then
-		if RageTarget and lplr.Character and RageBotEnable == true and not canshoot then 
-			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (RageTarget[HitpartSelectOption].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
-		elseif Nospread == true then
-			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
-		end
-	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
-		return wait(99e99)
-	elseif tostring(method) == "FireServer" and string.find(tostring(args[1]),'{') then
-		return wait(99e99)
-	end
-	-- bypass end
-	return oldNamecall(unpack(args))
-end)
+
 
 local Arguments
 local LastShot = "Head"
 local Crouch =  UserInputService:IsKeyDown(Enum.KeyCode.C) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
 
 local cbClient = getsenv(LocalPlayer.PlayerGui:WaitForChild("Client"))
+
 game:GetService("RunService").RenderStepped:Connect(function() 
 local yeet = gettargetrage()
 	if yeet then
@@ -1148,10 +1121,7 @@ local yeet = gettargetrage()
 							[13] = Vector3.new()
 							}
 					end
-					if ResloverEnable then
-						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
-					end
-					cbClient.firebullet()
+					game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
 					if BodyAimSelectOption ~= "None" then
 						if BodyAimSelectOption == "Every Other shot" then
 							if LastShot == "Head" then
@@ -1189,24 +1159,25 @@ function characterrotate(pos)
 	end)
 end
 
+
+
 local leftrotation = CFrame.new(-150,0,0)
 local rightrotation = CFrame.new(150,0,0)
 local backrotation = CFrame.new(-4,0,0)
 local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
 
+local inputser = game:GetService("UserInputService")
 _G.keydownawsd = 'a'
 game:GetService("RunService").RenderStepped:Connect(function()
 	if AntiAimEnable == true then
 		if  PitchSelectOption == 'Keybind' then
-			if _G.keydownawsd == 'a' then
+			if _G.keydownawsd == 'd' then
 				characterrotate((workspace.CurrentCamera.CFrame * rightrotation).p)
-			elseif _G.keydownawsd == 'w' or 's' then
+			elseif _G.keydownawsd == 's' then
 				characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
-			elseif _G.keydownawsd == 'd' then
+			elseif _G.keydownawsd == 'a' then
 				characterrotate((workspace.CurrentCamera.CFrame * leftrotation).p)
 			end
-		elseif PitchSelectOption == 'Manual' then
-			characterrotate((workspace.CurrentCamera.CFrame * CFrame.new(YawManualhValue - 150,0,0)).p)
 		elseif PitchSelectOption== 'Reversed' then
 			characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
 		elseif PitchSelectOption == 'Jitter' then
@@ -1235,14 +1206,91 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	if AntiAimDown then
 		game.ReplicatedStorage.Events.ControlTurn:FireServer(-((Downscale*0.05) + 0.96247750520706))
 	end
+
+	if inputser:IsKeyDown(Enum.KeyCode.Left) then
+		_G.keydownawsd = 'a'
+	elseif inputser:IsKeyDown(Enum.KeyCode.Right) then
+		_G.keydownawsd = 'd'
+	elseif inputser:IsKeyDown(Enum.KeyCode.Down) then
+		_G.keydownawsd = 's'
+	end	
 end)
 
-local keyboard = game:GetService("Players").LocalPlayer:GetMouse()
-keyboard.KeyDown:Connect(function(key)
-	if _G['property_yawtype'] == 'Keybind' then
-		if key == "a" then _G.keydownawsd = 'a' end
-		if key == "w" then _G.keydownawsd = 'w' end
-		if key == "s" then _G.keydownawsd = 's' end
-		if key == "d" then _G.keydownawsd = 'd' end
+
+
+local curVel = 16
+local isBhopping = false
+
+local Minvalue = BhopAmount
+local MaxValue = BhopAmount
+local Acceleration = BhopAmount
+print("locals")
+
+local function CharacterAdded()
+	wait(0.5)
+ 	Minvalue = BhopAmount
+ 	MaxValue = BhopAmount
+ 	Acceleration = BhopAmount
+	wait(0.5)
+	if IsAlive(LocalPlayer) then
+		LocalPlayer.Character.Humanoid.StateChanged:Connect(function(state)
+			if EnableBhop == true then
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) == false then
+					isBhopping = false
+					curVel = Minvalue
+				elseif state == Enum.HumanoidStateType.Landed and UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+					LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+				elseif state == Enum.HumanoidStateType.Jumping then
+					isBhopping = true
+					curVel = (curVel + Acceleration) >= MaxValue and MaxValue or curVel + Acceleration
+				end
+			end
+		end)
+	else
+		isBhopping = false
+	end
+end
+
+print("Char function")
+
+oldNewIndex = hookfunc(getrawmetatable(game.Players.LocalPlayer.PlayerGui.Client).__newindex, newcclosure(function(self, idx, val)
+	if not checkcaller() then
+		if self.Name == "Humanoid" and idx == "WalkSpeed" and val ~= 0 and isBhopping == true then 
+			val = curVel
+		end
+	end
+    return oldNewIndex(self, idx, val)
+end))
+
+print("hookfunk")
+
+
+spawn(function()
+	while true do
+		wait(0.3)
+		CharacterAdded()
 	end
 end)
+
+
+
+
+--[[local lplr = game:GetService("Players").LocalPlayer
+if lplr.Character and not lplr:FindFirstChild('XDDLA') then
+	Instance.new('Sky',lplr.Character).Name = 'XDDLA'
+	local baby = lplr.Character
+	while baby.Parent == workspace do 
+		delay(0,function()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(-10,0,0)
+			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(-10,0,0)
+			cameraoffset = false
+		end)
+		wait()
+		delay(0,function()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.Head.Position + Vector3.new(0,-1.5,0)
+			game.Players.LocalPlayer.Character.HumanoidRootPart.Position = game.Players.LocalPlayer.Character.Head.Position + Vector3.new(0,1.5,0)
+			cameraoffset = false
+		end)
+		wait()
+	end
+end--]]
