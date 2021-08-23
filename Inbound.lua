@@ -47,6 +47,35 @@ local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every O
 	BodyAimSelectOption = String
 end)
 
+local KillallEnable = false
+local KillallEnableToggle = Ragebot:CreateToggle("Kill all", false, function(State)
+	KillallEnable = State
+end)
+
+game:GetService("RunService").RenderStepped:connect(function()
+	if KillallEnable then
+		for i,v in pairs(game.Players:GetPlayers()) do 
+			if v.Character and v ~= game.Players.LocalPlayer and v.TeamColor ~= game.Players.LocalPlayer.TeamColor then
+				local oh1 = v.Character.Head
+				local oh2 = v.Character.Head.CFrame.p
+				local oh3 = "AWP"
+				local oh4 = 4096
+				local oh5 = game.Players.LocalPlayer.Character.Gun
+				local oh8 = 15
+				local oh9 = false
+				local oh10 = false
+				local oh11 = Vector3.new(-126.878326, 353.474854, 49.3892708)
+				local oh12 = 16868
+				local oh13 = Vector3.new(0, 0, -1)
+				game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
+				game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
+				game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
+			end
+		end
+	end
+end)
+
+
 local AntiAimSection = RageTab:CreateSection("Anti Aim")
 
 local AntiAimEnable = false
@@ -84,6 +113,8 @@ local aasmooth = 0
 local AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 ,true, function(Value)
 	aasmooth = Value
 end)
+
+
 
 --[[local Crimwalk = AntiAimSection:CreateButton("CrimWalk ;)", function()
 	local lplr = game:GetService("Players").LocalPlayer
