@@ -371,6 +371,18 @@ local TPArms = SelfVisuals:CreateToggle("Enable Arms", nil, function(State)
 	ArmsEnable = not State
 end)
 
+local HitSounds = WorldTab:CreateSection("Sounds")
+
+local EnableHitSound = false
+local EnableHitSoundToggle= HitSounds:CreateToggle("Enable HitSound", nil, function(State)
+	EnableHitSound = State
+end)
+
+local EnableKillSound = false
+local EnableKillSoundToggle= HitSounds:CreateToggle("Enable HitSound", nil, function(State)
+	EnableKillSound  = State
+end)
+
 local Optimastion = WorldTab:CreateSection("Optimastion")
 
 local BloodEnabled = false
@@ -1275,6 +1287,27 @@ oldNewIndex = hookfunc(getrawmetatable(game.Players.LocalPlayer.PlayerGui.Client
 end))
 
 print("hookfunk")
+
+game.Players.LocalPlayer.Additionals.TotalDamage.Changed:Connect(function(val)
+	if EnableHitSound and val ~= 0 then
+		local marker = Instance.new("Sound")
+		marker.Parent = game:GetService("SoundService")
+		marker.SoundId = "rbxassetid://7149336668"
+		marker.Volume = 3
+		marker:Play()
+	end
+end)
+
+game.Players.LocalPlayer.Status.Kills.Changed:Connect(function(val)
+	if EnableKillSound ~= "" and val ~= 0 then
+		local marker = Instance.new("Sound")
+		marker.Parent = game:GetService("SoundService")
+		marker.SoundId = "rbxassetid://5043539486"
+		marker.Volume = 3
+		marker:Play()
+	end
+end)
+
 
 
 spawn(function()
