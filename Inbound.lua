@@ -374,12 +374,12 @@ end)
 local HitSounds = WorldTab:CreateSection("Sounds")
 
 local EnableHitSound = false
-local EnableHitSoundToggle= HitSounds:CreateToggle("Enable HitSound", nil, function(State)
+local EnableHitSoundToggle= HitSounds:CreateToggle("Enable Hit Sound", nil, function(State)
 	EnableHitSound = State
 end)
 
 local EnableKillSound = false
-local EnableKillSoundToggle= HitSounds:CreateToggle("Enable HitSound", nil, function(State)
+local EnableKillSoundToggle= HitSounds:CreateToggle("Enable Kill Sound", nil, function(State)
 	EnableKillSound  = State
 end)
 
