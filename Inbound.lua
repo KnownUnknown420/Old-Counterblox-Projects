@@ -464,6 +464,14 @@ ToggleButtonUI:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""),
 end)
 ToggleButtonUI:SetState(true)
 
+local MiscFeatues = MiscTab:CreateSection("Misc Features")
+
+local DisableFiler = false
+local ChatFilterToggle = MiscFeatues:CreateToggle("Disable Chat Filter", nil, function(State)
+	DisableFiler = State
+end)
+
+
 local ConfigSection = MiscTab:CreateSection("Config")
 
 local ConfigName = "1"
@@ -761,6 +769,7 @@ function backtrack(character)
 	end)
 end
 
+
 function gettarget()
 	local nearestmag = SilentAimFOV
 	local nearestcharacter = nil
@@ -803,6 +812,8 @@ function gettarget()
 	return nearestcharacter
 end
 
+local RageTarget
+
 mt.__namecall = newClose(function(...)
 	local method = namecallMethod()
 	local args = {...}
@@ -821,19 +832,15 @@ mt.__namecall = newClose(function(...)
 			args[2] = m.Target.thing.Value.Head
 			args[3] = m.Target.thing.Value.Head.CFrame.p
 		end
-		spawn(function()
-			if _G['property_hitblock'] == true then
-				smallblock(args[3])
-			end
-			latestshot = args[3]
-		end)
-		if target then
+
+		if target or RageTarget then
 			spawn(function()
-				if _G['property_beam'] == true then
+				if BulletTracers then
 					beam(args[2],args[3],lplr.Character.Head.CFrame.p)
 				end
 			end)
-	end
+		end
+
 		-- bypass start
 	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
 		return wait(99e99)
@@ -1080,17 +1087,11 @@ function gettargetrage()
 	return nearestcharacter
 end
 
-
-
 local RageTarget
 local canshoot = true
 
-
 local Arguments
 local LastShot = "Head"
-
-
-
 
 game:GetService("RunService").RenderStepped:Connect(function() 
 local yeet = gettargetrage()
@@ -1133,7 +1134,11 @@ local yeet = gettargetrage()
 							[13] = Vector3.new()
 							}
 					end
+
+
 					game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+
+				
 					if BodyAimSelectOption ~= "None" then
 						if BodyAimSelectOption == "Every Other shot" then
 							if LastShot == "Head" then
@@ -1151,6 +1156,9 @@ local yeet = gettargetrage()
 		else
 		canshoot = true
 		end
+	end
+	if workspace.Status.RoundOver.Value == true then
+		canshoot = true
 	end
 end)
 
@@ -1373,6 +1381,7 @@ end)
 			{'AWP_Silence'},
 			{'AWP_Venomus'},
 			{'AWP_Weeb'},
+			{'Banana_Stock'},
 			{'Bayonet_Aequalis'},
 			{'Bayonet_Banner'},
 			{'Bayonet_Candy Cane'},
@@ -1528,6 +1537,7 @@ end)
 			{'FiveSeven_Stigma'},
 			{'FiveSeven_Sub Zero'},
 			{'FiveSeven_Summer'},
+			{'Flip Knife_Stock'},
 			{'G3SG1_Amethyst'},
 			{'G3SG1_Autumn'},
 			{'G3SG1_Foliage'},
