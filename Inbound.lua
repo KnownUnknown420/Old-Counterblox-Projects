@@ -43,11 +43,9 @@ end)
 HitpartSelect:SetOption("Head")
 
 local BodyAimSelectOption = "None"
-local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot","Double Tap",}, function(String)
+local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot",}, function(String)
 	BodyAimSelectOption = String
 end)
-
-
 
 local AntiAimSection = RageTab:CreateSection("Anti Aim")
 
@@ -1116,20 +1114,6 @@ local yeet = gettargetrage()
 					[12] = 100,
 					[13] = Vector3.new()
 					}
-					elseif BodyAimSelectOption == "Double Tap" then
-					Arguments = {
-						[1] = workspace[RageTarget.Name]["UpperTorso"],
-						[2] = workspace[RageTarget.Name]["UpperTorso"].Position,
-						[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
-						[4] = 100,
-						[5] = "Awp",
-						[8] = 1,
-						[9] = false,
-						[10] = true,
-						[11] = Vector3.new(),
-						[12] = 100,
-						[13] = Vector3.new()
-						}
 					else
 						Arguments = {
 							[1] = workspace[RageTarget.Name][HitpartSelectOption],
