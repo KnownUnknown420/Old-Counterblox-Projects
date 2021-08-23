@@ -6,8 +6,10 @@ local Config = {
 	Keybind = Enum.KeyCode.Insert
 }
 
+
+
 local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pawel12d/hexagon/main/scripts/ESP.lua"))()
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
+Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
 local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
 
 ----Rage Tab
@@ -16,39 +18,39 @@ local RageTab = Window:CreateTab("Rage")
 local Ragebot = RageTab:CreateSection("Rage bot")
 
 local RageBotEnable = false
-local RageToggle =	Ragebot:CreateToggle("Enable", false, function(State)
+RageToggle =	Ragebot:CreateToggle("Enable", false, function(State)
 	RageBotEnable = State
 end)
 
 local InstantKill = false
-local InstantKillToggle = Ragebot:CreateToggle("Instant Kill", false, function(State)
+InstantKillToggle = Ragebot:CreateToggle("Instant Kill", false, function(State)
 	InstantKill = State
 end)
 
 local Nospread = false
-local NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
+NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
 	Nospread = State
 end)
 
 local TargetType = "Closest from Mouse"
-local TargetSelect = Ragebot:CreateDropdown("Targeting Method", {"Closest from Mouse","Closest from player"}, function(String)
+TargetSelect = Ragebot:CreateDropdown("Targeting Method", {"Closest from Mouse","Closest from player"}, function(String)
 	TargetType = String
 end)
 TargetSelect:SetOption("Closest from Mouse")
 
 local HitpartSelectOption = "Head"
-local HitpartSelect = Ragebot:CreateDropdown("Hit Boxes", {"Head","UpperTorso"}, function(String)
+HitpartSelect = Ragebot:CreateDropdown("Hit Boxes", {"Head","UpperTorso"}, function(String)
 	HitpartSelectOption = String
 end)
 HitpartSelect:SetOption("Head")
 
 local BodyAimSelectOption = "None"
-local BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot",}, function(String)
+BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot",}, function(String)
 	BodyAimSelectOption = String
 end)
 
 local KillallEnable = false
-local KillallEnableToggle = Ragebot:CreateToggle("Kill all", false, function(State)
+KillallEnableToggle = Ragebot:CreateToggle("Kill all", false, function(State)
 	KillallEnable = State
 end)
 
@@ -453,7 +455,13 @@ ToggleButtonUI:CreateKeybind(tostring(Config.Keybind):gsub("Enum.KeyCode.", ""),
 end)
 ToggleButtonUI:SetState(true)
 
+local ConfigSection = MiscTab:CreateSection("Config")
 
+local ConfigName = "1"
+local ConfigNameSelect = ConfigSection:CreateDropdown("Config", {"1", "2", "3", "4", "5"}, function(String)
+	ConfigName = String
+end)
+PitchSlect:SetOption("1")
 
 ----Scripts
 
@@ -1323,8 +1331,6 @@ game.Players.LocalPlayer.Status.Kills.Changed:Connect(function(val)
 	end
 end)
 
-loadstring(game:HttpGet(('https://pastebin.com/raw/dAQ8LTR1'),true))()
-
 spawn(function()
 	while true do
 		wait(0.3)
@@ -1332,7 +1338,6 @@ spawn(function()
 	end
 end)
 
-local LocalPlayer = game:GetService("Players").LocalPlayer
 		local Client = getsenv(game.Players.LocalPlayer.PlayerGui.Client)
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	
@@ -1870,8 +1875,6 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 			{'Handwraps_Green Hex'},
 		}
 	
-		local isUnlocked
-	
 		local mt = getrawmetatable(game)
 		local oldNamecall = mt.__namecall
 		setreadonly(mt, false)
@@ -1921,12 +1924,55 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 	
 		Client.CurrentInventory = allSkins
 	
-		local TClone, CTClone = LocalPlayer.SkinFolder.TFolder:Clone(), game.Players.LocalPlayer.SkinFolder.CTFolder:Clone()
-		LocalPlayer.SkinFolder.TFolder:Destroy()
-		LocalPlayer.SkinFolder.CTFolder:Destroy()
-		TClone.Parent = LocalPlayer.SkinFolder
-		CTClone.Parent = LocalPlayer.SkinFolder
-	
+local TClone, CTClone = LocalPlayer.SkinFolder.TFolder:Clone(), game.Players.LocalPlayer.SkinFolder.CTFolder:Clone()
+LocalPlayer.SkinFolder.TFolder:Destroy()
+LocalPlayer.SkinFolder.CTFolder:Destroy()
+TClone.Parent = LocalPlayer.SkinFolder
+CTClone.Parent = LocalPlayer.SkinFolder
 
+local Name
+local JSON	
+game:GetService("RunService").RenderStepped:connect(function()
+ 	Name = ConfigName ..".Inbound" 
+	print(Name)
+ 	JSON = game:service'HttpService':JSONDecode(readfile(Name)) 
+	JSON.RageBotEnable = RageBotEnable
+	JSON.InstantKill = InstantKill
+	JSON.Nospread = Nospread
+end)
 
+local DefaultSettings = { 
+RageBotEnable = false,
+InstantKill = false,
+Nospread = false
+}
 
+if not pcall(function() readfile("1.Inbound") end) then writefile("1.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
+if not pcall(function() readfile("2.Inbound") end) then writefile("2.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
+if not pcall(function() readfile("3.Inbound") end) then writefile("3.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
+if not pcall(function() readfile("4.Inbound") end) then writefile("4.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
+if not pcall(function() readfile("5.Inbound") end) then writefile("5.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
+
+local function Save()
+	writefile(Name,game:service'HttpService':JSONEncode(JSON))
+end	
+
+local function Load()
+	print("not done yet!")
+end	
+
+local function resetToDefaults()
+writefile(Name, game:service'HttpService':JSONEncode(DefaultSettings))
+end
+
+local SaveButton = ConfigSection:CreateButton("Save", function()
+	Save()
+end)
+
+local LoadButton = ConfigSection:CreateButton("Load", function()
+	Load()
+end)
+
+local ResetButton = ConfigSection:CreateButton("Reset", function()
+	resetToDefaults()
+end)
