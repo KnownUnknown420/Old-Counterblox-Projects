@@ -18,17 +18,17 @@ local RageTab = Window:CreateTab("Rage")
 local Ragebot = RageTab:CreateSection("Rage bot")
 
 local RageBotEnable = false
-RageToggle =	Ragebot:CreateToggle("Enable", false, function(State)
+local RageToggle = Ragebot:CreateToggle("Enable", false, function(State)
 	RageBotEnable = State
 end)
 
 local InstantKill = false
-InstantKillToggle = Ragebot:CreateToggle("Instant Kill", false, function(State)
+local InstantKillToggle = Ragebot:CreateToggle("Instant Kill", false, function(State)
 	InstantKill = State
 end)
 
 local Nospread = false
-NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
+local NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
 	Nospread = State
 end)
 
@@ -48,6 +48,7 @@ local BodyAimSelectOption = "None"
 BodyAimSelect = Ragebot:CreateDropdown("Baim Conditions", {"None","Every Other shot",}, function(String)
 	BodyAimSelectOption = String
 end)
+BodyAimSelect:SetOption("None")
 
 local KillallEnable = false
 KillallEnableToggle = Ragebot:CreateToggle("Kill all", false, function(State)
@@ -168,6 +169,7 @@ end)
 local FovCircleEnable = false
 local FovCircleToggle =	SilentAimSection:CreateToggle("Enable FOV Circle", false, function(State)
 	ImageLabel.Visible = State
+	FovCircleEnable = State
 end)
 
 local HeadShotChance = 1
@@ -333,10 +335,12 @@ local WorldSettings = WorldTab:CreateSection("World Lighting")
 
 local ColorCorrectionText = WorldSettings:CreateLabel("WorldTint")
 
+local ColorCorrectionEnabled = false
 local ColorCorrection = Instance.new("ColorCorrectionEffect", game.Lighting)
 local ColorCorrectionColor  = Color3.fromRGB(255,255,255)
 local ColorCorrectionEffectToggle = WorldSettings:CreateToggle("Enabled", nil, function(State)
-	ColorCorrection.Enabled = State
+	ColorCorrectionEnabled = State
+	ColorCorrection.Enabled = ColorCorrectionEnabled
 end)
 
 local ColorEffectColor = WorldSettings:CreateColorpicker("Color", function(Color)
@@ -377,11 +381,13 @@ ThirdPersonToggle:CreateKeybind("V", function(Key)
 end)
 
 local TPAmount = 0
-local TPSlider = SelfVisuals:CreateSlider("Amount", 0,50,15,true, function(Value)
+TPSlider = SelfVisuals:CreateSlider("Amount", 0,50,15,true, function(Value)
 	TPAmount = Value
 end)
 
-local BulletHoleToggle = SelfVisuals:CreateToggle("Disable Scope", nil, function(State)
+local ScopeDisable = false
+BulletHoleToggle = SelfVisuals:CreateToggle("Disable Scope", nil, function(State)
+	ScopeDisable = State
 	if State then
 		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Scope.ImageTransparency = 1
 		game:GetService("Players").LocalPlayer.PlayerGui.GUI.Crosshairs.Frame1.BackgroundTransparency = 1
@@ -398,35 +404,37 @@ local BulletHoleToggle = SelfVisuals:CreateToggle("Disable Scope", nil, function
 end)
 
 local ArmsEnable = true
-local TPArms = SelfVisuals:CreateToggle("Enable Arms", nil, function(State)
+TPArms = SelfVisuals:CreateToggle("Enable Arms", nil, function(State)
 	ArmsEnable = not State
 end)
 
 local HitSounds = WorldTab:CreateSection("Sounds")
 
 local EnableHitSound = false
-local EnableHitSoundToggle= HitSounds:CreateToggle("Enable Hit Sound", nil, function(State)
+EnableHitSoundToggle= HitSounds:CreateToggle("Enable Hit Sound", nil, function(State)
 	EnableHitSound = State
 end)
 
 local EnableKillSound = false
-local EnableKillSoundToggle= HitSounds:CreateToggle("Enable Kill Sound", nil, function(State)
+EnableKillSoundToggle= HitSounds:CreateToggle("Enable Kill Sound", nil, function(State)
 	EnableKillSound  = State
 end)
 
 local Optimastion = WorldTab:CreateSection("Optimastion")
 
 local BloodEnabled = false
-local BloodToggle = Optimastion:CreateToggle("Disable Blood", nil, function(State)
+BloodToggle = Optimastion:CreateToggle("Disable Blood", nil, function(State)
 	BloodEnabled = State
 end)
 
 local BulletHolesEnabled = false
-local BulletHoleToggle = Optimastion:CreateToggle("Disable Bullet holes", nil, function(State)
+BulletHoleToggle = Optimastion:CreateToggle("Disable Bullet holes", nil, function(State)
 	BulletHolesEnabled = State
 end)
 
-local WorldShadows = Optimastion:CreateToggle("Disable Global Shadows", nil, function(State)
+local WorldShadowsEnable = false
+WorldShadows = Optimastion:CreateToggle("Disable Global Shadows", nil, function(State)
+	WorldShadowsEnable = State
 	game.Lighting.GlobalShadows = not State
 end)
 
@@ -443,6 +451,7 @@ end)
 local BhopAmount = 25
 local BhopAmountSlider = BhopSettings:CreateSlider("Amount", 0,50,25,true, function(Value)
 	BhopAmount = Value
+
 end)
 
 local UiSettings = MiscTab:CreateSection("Ui Settings")
@@ -750,50 +759,6 @@ function backtrack(character)
 			end
 		end
 	end)
-end
-
-function smallblock(pos)
-	if pos then
-		local block = Instance.new('Part',workspace)
-		block.Anchored = true
-		block.Size = Vector3.new(0.3,0.3,0.3)
-		block.Position = pos
-		block.CanCollide = false
-		block.Material = Enum.Material.SmoothPlastic
-		block.Color = Color3.fromRGB(255, 71, 129)
-		game.Debris:AddItem(block,2)
-	end
-end
-	
-local function beam(part,pos,yeeet)
-	if part then
-		if part.Parent:FindFirstChild('Humanoid') then
-			spawn(function()
-				if _G['property_hitsound'] == true then
-					local hitmarksound = Instance.new('Sound',workspace)
-					hitmarksound.SoundId = 'rbxassetid://4491275997'
-					hitmarksound.PlayOnRemove = true
-					hitmarksound.Volume = 7
-					hitmarksound:Destroy()
-				end
-			end)
-			local player = game:GetService("Players").LocalPlayer
-			local ray = Ray.new(yeeet, (pos - yeeet).unit * 300)
-			local part, position = workspace:FindPartOnRay(ray, player.Character, false, true)
-			local beam = Instance.new("Part", workspace)
-			beam.BrickColor = BrickColor.new("Bright red")
-			beam.FormFactor = "Custom"
-			beam.Material = "Neon"
-			beam.Transparency = 0.5
-			beam.Anchored = true
-			beam.Locked = true
-			beam.CanCollide = false
-			local distance = (player.Character.Head.CFrame.p - position).magnitude
-			beam.Size = Vector3.new(0.08, 0.05, distance)
-			beam.CFrame = CFrame.new(player.Character.Head.CFrame.p, position) * CFrame.new(0, 0, -distance / 2)
-			game.Debris:AddItem(beam,2)
-		end
-	end
 end
 
 function gettarget()
@@ -1308,8 +1273,6 @@ oldNewIndex = hookfunc(getrawmetatable(game.Players.LocalPlayer.PlayerGui.Client
 	end
     return oldNewIndex(self, idx, val)
 end))
-
-print("hookfunk")
 
 game.Players.LocalPlayer.Additionals.TotalDamage.Changed:Connect(function(val)
 	if EnableHitSound and val ~= 0 then
@@ -1930,21 +1893,64 @@ LocalPlayer.SkinFolder.CTFolder:Destroy()
 TClone.Parent = LocalPlayer.SkinFolder
 CTClone.Parent = LocalPlayer.SkinFolder
 
-local Name
+--[[local Name
 local JSON	
 game:GetService("RunService").RenderStepped:connect(function()
  	Name = ConfigName ..".Inbound" 
-	print(Name)
  	JSON = game:service'HttpService':JSONDecode(readfile(Name)) 
-	JSON.RageBotEnable = RageBotEnable
-	JSON.InstantKill = InstantKill
-	JSON.Nospread = Nospread
 end)
 
 local DefaultSettings = { 
 RageBotEnable = false,
 InstantKill = false,
-Nospread = false
+Nospread = false,
+TargetType = "Closest from Mouse",
+HitpartSelectOption = "Head",
+BodyAimSelectOption = "None",
+AntiAimEnable = false,
+HeadDisable = false,
+PitchSelectOption = "Default",
+AntiAimDown = false,
+Downscale = 0,
+aaspeed = 0,
+aasmooth = 0,
+SilentAimEnabled = false,
+SilentAimFOV = 1,
+FovCircleEnable = false,
+HeadShotChance = 1,
+BodyShotChance = 1,
+TriggerbotEnable = 1,
+Triggerdelay = 0,
+BTEnable = false,
+BTLength = 1,
+ESPShowTeam = false,
+ESPEnabled = false,
+ESPBoxes = false,
+ESPShowInfo = false,
+ESPInfoName = false,
+ESPInfoWeapons = false,
+ESPInfoHealth = false,
+ESPInfoDistance = false,
+EnemyEnableChams = false,
+ChamsEnabled = false,
+TeamEnableChams = false,
+DroppedBombTimer = false,
+DroppedBombEspEnabled = false,
+AmbientLighting = false,
+ColorCorrectionEnabled = false,
+FovValue = 70,
+FovEnabled = false,
+ThirdPerson = false,
+TPAmount = 15,
+ScopeDisable = false,
+ArmsEnable = true,
+EnableKillSound  = false,
+EnableHitSound = false,
+BulletHolesEnabled = false,
+BloodEnabled = false,
+WorldShadowsEnable = false,
+BhopAmount = 25,
+EnableBhop = false
 }
 
 if not pcall(function() readfile("1.Inbound") end) then writefile("1.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
@@ -1954,11 +1960,116 @@ if not pcall(function() readfile("4.Inbound") end) then writefile("4.Inbound", g
 if not pcall(function() readfile("5.Inbound") end) then writefile("5.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
 
 local function Save()
+	JSON.RageBotEnable = RageBotEnable
+	JSON.InstantKill = InstantKill
+	JSON.Nospread = Nospread
+	JSON.TargetType = TargetType
+	JSON.HitpartSelectOption = HitpartSelectOption
+	JSON.BodyAimSelectOption = BodyAimSelectOption
+	JSON.AntiAimEnable = AntiAimEnable
+	JSON.HeadDisable = HeadDisable
+	JSON.PitchSelectOption = PitchSelectOption
+	JSON.AntiAimDown = AntiAimDown
+	JSON.Downscale = Downscale
+	JSON.aaspeed = aaspeed
+	JSON.aasmooth = aasmooth
+	JSON.SilentAimEnabled = SilentAimEnabled
+	JSON.SilentAimFOV = SilentAimFOV
+	JSON.FovCircleEnable = FovCircleEnable
+	JSON.HeadShotChance = HeadShotChance
+	JSON.BodyShotChance = BodyShotChance
+	JSON.TriggerbotEnable = TriggerbotEnable
+	JSON.Triggerdelay = Triggerdelay
+	JSON.BTEnable = BTEnable
+	JSON.BTLength = BTLength 
+	JSON.ESPEnabled = ESP.Enabled
+	JSON.ESPShowTeam = ESP.ShowTeam
+	JSON.ESPBoxes = ESP.Boxes
+	JSON.ESPShowInfo = ESP.ShowInfo
+	JSON.ESPInfoName = ESP.Info.Name
+	JSON.ESPInfoWeapons = ESP.Info.Weapons
+	JSON.ESPInfoHealth = ESP.Info.Health
+	JSON.ESPInfoDistance = ESP.Info.Distance
+	JSON.EnemyEnableChams = EnemyEnableChams
+	JSON.ChamsEnabled = ChamsEnabled
+	JSON.TeamEnableChams = TeamEnableChams
+	JSON.DroppedBombTimer  = DroppedBombTimer 
+	JSON.DroppedBombEspEnabled  = DroppedBombEspEnabled
+	JSON.AmbientLighting = AmbientLighting 
+	JSON.ColorCorrectionEnabled = ColorCorrectionEnabled
+	JSON.FovValue = FovValue
+	JSON.FovEnabled = FovEnabled
+	JSON.ThirdPerson = ThirdPerson
+	JSON.TPAmount = TPAmount
+	JSON.ScopeDisable = ScopeDisable
+	JSON.ArmsEnable = ArmsEnable
+	JSON.EnableKillSound = EnableKillSound
+	JSON.EnableHitSound  = EnableHitSound 
+	JSON.BulletHolesEnabled  = BulletHolesEnabled
+	JSON.WorldShadowsEnable  = WorldShadowsEnable
+	JSON.BhopAmount = BhopAmount
+	JSON.EnableBhop = EnableBhop
+	JSON.BloodEnabled = BloodEnabled
 	writefile(Name,game:service'HttpService':JSONEncode(JSON))
 end	
 
 local function Load()
-	print("not done yet!")
+	RageBotEnable = JSON.RageBotEnable 
+	print(RageBotEnable)
+	RageToggle:SetValue(true)
+	InstantKill = JSON.InstantKill 
+	print(InstantKill)
+	InstantKillToggle:SetValue(true)
+	Nospread = JSON.Nospread
+	print(Nospread)
+	NospreadToggle:SetValue(true)
+	JSON.TargetType 
+	JSON.HitpartSelectOption 
+	JSON.BodyAimSelectOption 
+	JSON.AntiAimEnable 
+	JSON.HeadDisable 
+	JSON.PitchSelectOption 
+	JSON.AntiAimDown 
+	JSON.Downscale 
+	JSON.aaspeed 
+	JSON.aasmooth
+	JSON.SilentAimEnabled
+	JSON.SilentAimFOV
+	JSON.FovCircleEnable 
+	JSON.HeadShotChance 
+	JSON.BodyShotChance 
+	JSON.TriggerbotEnable 
+	JSON.Triggerdelay 
+	JSON.BTEnable 
+	JSON.BTLength 
+	JSON.ESPEnabled 
+	JSON.ESPShowTeam 
+	JSON.ESPBoxes 
+	JSON.ESPShowInfo 
+	JSON.ESPInfoName 
+	JSON.ESPInfoWeapons 
+	JSON.ESPInfoHealth 
+	JSON.ESPInfoDistance 
+	JSON.EnemyEnableChams
+	JSON.ChamsEnabled
+	JSON.TeamEnableChams 
+	JSON.DroppedBombTimer  
+	JSON.DroppedBombEspEnabled  
+	JSON.AmbientLighting  
+	JSON.ColorCorrectionEnabled 
+	JSON.FovValue 
+	JSON.FovEnabled
+	JSON.ThirdPerson 
+	JSON.TPAmount 
+	JSON.ScopeDisable 
+	JSON.ArmsEnable 
+	JSON.EnableKillSound 
+	JSON.EnableHitSound  
+	JSON.BulletHolesEnabled  
+	JSON.WorldShadowsEnable  
+	JSON.BhopAmount 
+	JSON.EnableBhop 
+	JSON.BloodEnabled 
 end	
 
 local function resetToDefaults()
@@ -1975,4 +2086,4 @@ end)
 
 local ResetButton = ConfigSection:CreateButton("Reset", function()
 	resetToDefaults()
-end)
+end)--]]
