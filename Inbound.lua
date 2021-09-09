@@ -78,7 +78,6 @@ game:GetService("RunService").RenderStepped:connect(function()
 	end
 end)
 
-
 local AntiAimSection = RageTab:CreateSection("Anti Aim")
 
 local AntiAimEnable = false
@@ -471,15 +470,6 @@ local ChatFilterToggle = MiscFeatues:CreateToggle("Disable Chat Filter", nil, fu
 	DisableFiler = State
 end)
 
-
-local ConfigSection = MiscTab:CreateSection("Config")
-
-local ConfigName = "1"
-local ConfigNameSelect = ConfigSection:CreateDropdown("Config", {"1", "2", "3", "4", "5"}, function(String)
-	ConfigName = String
-end)
-PitchSlect:SetOption("1")
-
 ----Scripts
 
 local function IsAlive(plr)
@@ -819,7 +809,7 @@ mt.__namecall = newClose(function(...)
 	local args = {...}
 	if method == "FindPartOnRayWithIgnoreList" then
 		table.insert(args[3],backtrackfolder)
-		if target and lplr.Character and SilentAimEnabled == true then 
+		if target and lplr.Character and SilentAimEnabled then 
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (target[bodyname].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		elseif Nospread == true then
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
@@ -832,7 +822,6 @@ mt.__namecall = newClose(function(...)
 			args[2] = m.Target.thing.Value.Head
 			args[3] = m.Target.thing.Value.Head.CFrame.p
 		end
-
 		if target or RageTarget then
 			spawn(function()
 				if BulletTracers then
@@ -852,33 +841,7 @@ mt.__namecall = newClose(function(...)
 end)
 
 
-function nameesp(character)
-	if not character:FindFirstChild("name_ESP") then
-		local name_ESP = Instance.new("BillboardGui")
-		local NAME = Instance.new("TextLabel")
-		name_ESP.Name = "name_ESP"
-		name_ESP.Parent = character
-		name_ESP.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-		name_ESP.Active = true
-		name_ESP.Adornee = character.Head
-		name_ESP.AlwaysOnTop = true
-		name_ESP.ExtentsOffset = Vector3.new(0, 2, 0)
-		name_ESP.LightInfluence = 1
-		name_ESP.Size = UDim2.new(0, 200, 0, 50)
-		
-		NAME.Name = "NAME"
-		NAME.Parent = name_ESP
-		NAME.BackgroundColor3 = Color3.new(1, 1, 1)
-		NAME.BackgroundTransparency = 1
-		NAME.Size = UDim2.new(0, 200, 0, 25)
-		NAME.Font = Enum.Font.SourceSansSemibold
-		NAME.Text = character.Name
-		NAME.TextColor3 = Color3.new(1, 1, 1)
-		NAME.TextSize = 12
-		NAME.TextStrokeTransparency = 0.30000001192093
-		NAME.TextWrapped = true
-	end
-end
+
 
 
 
@@ -1086,6 +1049,23 @@ function gettargetrage()
 	end)
 	return nearestcharacter
 end
+
+mt.__namecall = newClose(function(...)
+	local method = namecallMethod()
+	local args = {...}
+	if method == "FindPartOnRayWithIgnoreList" then
+		table.insert(args[3],backtrackfolder)
+		if RageTarget and RageBotEnable then 
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (RageTarget[bodyname].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		end
+	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
+		return wait(99e99)
+	elseif tostring(method) == "FireServer" and string.find(tostring(args[1]),'{') then
+		return wait(99e99)
+	end
+	-- bypass end
+	return oldNamecall(unpack(args))
+end)
 
 local RageTarget
 local canshoot = true
@@ -1903,197 +1883,3 @@ LocalPlayer.SkinFolder.CTFolder:Destroy()
 TClone.Parent = LocalPlayer.SkinFolder
 CTClone.Parent = LocalPlayer.SkinFolder
 
---[[local Name
-local JSON	
-game:GetService("RunService").RenderStepped:connect(function()
- 	Name = ConfigName ..".Inbound" 
- 	JSON = game:service'HttpService':JSONDecode(readfile(Name)) 
-end)
-
-local DefaultSettings = { 
-RageBotEnable = false,
-InstantKill = false,
-Nospread = false,
-TargetType = "Closest from Mouse",
-HitpartSelectOption = "Head",
-BodyAimSelectOption = "None",
-AntiAimEnable = false,
-HeadDisable = false,
-PitchSelectOption = "Default",
-AntiAimDown = false,
-Downscale = 0,
-aaspeed = 0,
-aasmooth = 0,
-SilentAimEnabled = false,
-SilentAimFOV = 1,
-FovCircleEnable = false,
-HeadShotChance = 1,
-BodyShotChance = 1,
-TriggerbotEnable = 1,
-Triggerdelay = 0,
-BTEnable = false,
-BTLength = 1,
-ESPShowTeam = false,
-ESPEnabled = false,
-ESPBoxes = false,
-ESPShowInfo = false,
-ESPInfoName = false,
-ESPInfoWeapons = false,
-ESPInfoHealth = false,
-ESPInfoDistance = false,
-EnemyEnableChams = false,
-ChamsEnabled = false,
-TeamEnableChams = false,
-DroppedBombTimer = false,
-DroppedBombEspEnabled = false,
-AmbientLighting = false,
-ColorCorrectionEnabled = false,
-FovValue = 70,
-FovEnabled = false,
-ThirdPerson = false,
-TPAmount = 15,
-ScopeDisable = false,
-ArmsEnable = true,
-EnableKillSound  = false,
-EnableHitSound = false,
-BulletHolesEnabled = false,
-BloodEnabled = false,
-WorldShadowsEnable = false,
-BhopAmount = 25,
-EnableBhop = false
-}
-
-if not pcall(function() readfile("1.Inbound") end) then writefile("1.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
-if not pcall(function() readfile("2.Inbound") end) then writefile("2.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
-if not pcall(function() readfile("3.Inbound") end) then writefile("3.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
-if not pcall(function() readfile("4.Inbound") end) then writefile("4.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
-if not pcall(function() readfile("5.Inbound") end) then writefile("5.Inbound", game:service'HttpService':JSONEncode(DefaultSettings)) end 
-
-local function Save()
-	JSON.RageBotEnable = RageBotEnable
-	JSON.InstantKill = InstantKill
-	JSON.Nospread = Nospread
-	JSON.TargetType = TargetType
-	JSON.HitpartSelectOption = HitpartSelectOption
-	JSON.BodyAimSelectOption = BodyAimSelectOption
-	JSON.AntiAimEnable = AntiAimEnable
-	JSON.HeadDisable = HeadDisable
-	JSON.PitchSelectOption = PitchSelectOption
-	JSON.AntiAimDown = AntiAimDown
-	JSON.Downscale = Downscale
-	JSON.aaspeed = aaspeed
-	JSON.aasmooth = aasmooth
-	JSON.SilentAimEnabled = SilentAimEnabled
-	JSON.SilentAimFOV = SilentAimFOV
-	JSON.FovCircleEnable = FovCircleEnable
-	JSON.HeadShotChance = HeadShotChance
-	JSON.BodyShotChance = BodyShotChance
-	JSON.TriggerbotEnable = TriggerbotEnable
-	JSON.Triggerdelay = Triggerdelay
-	JSON.BTEnable = BTEnable
-	JSON.BTLength = BTLength 
-	JSON.ESPEnabled = ESP.Enabled
-	JSON.ESPShowTeam = ESP.ShowTeam
-	JSON.ESPBoxes = ESP.Boxes
-	JSON.ESPShowInfo = ESP.ShowInfo
-	JSON.ESPInfoName = ESP.Info.Name
-	JSON.ESPInfoWeapons = ESP.Info.Weapons
-	JSON.ESPInfoHealth = ESP.Info.Health
-	JSON.ESPInfoDistance = ESP.Info.Distance
-	JSON.EnemyEnableChams = EnemyEnableChams
-	JSON.ChamsEnabled = ChamsEnabled
-	JSON.TeamEnableChams = TeamEnableChams
-	JSON.DroppedBombTimer  = DroppedBombTimer 
-	JSON.DroppedBombEspEnabled  = DroppedBombEspEnabled
-	JSON.AmbientLighting = AmbientLighting 
-	JSON.ColorCorrectionEnabled = ColorCorrectionEnabled
-	JSON.FovValue = FovValue
-	JSON.FovEnabled = FovEnabled
-	JSON.ThirdPerson = ThirdPerson
-	JSON.TPAmount = TPAmount
-	JSON.ScopeDisable = ScopeDisable
-	JSON.ArmsEnable = ArmsEnable
-	JSON.EnableKillSound = EnableKillSound
-	JSON.EnableHitSound  = EnableHitSound 
-	JSON.BulletHolesEnabled  = BulletHolesEnabled
-	JSON.WorldShadowsEnable  = WorldShadowsEnable
-	JSON.BhopAmount = BhopAmount
-	JSON.EnableBhop = EnableBhop
-	JSON.BloodEnabled = BloodEnabled
-	writefile(Name,game:service'HttpService':JSONEncode(JSON))
-end	
-
-local function Load()
-	RageBotEnable = JSON.RageBotEnable 
-	print(RageBotEnable)
-	RageToggle:SetValue(true)
-	InstantKill = JSON.InstantKill 
-	print(InstantKill)
-	InstantKillToggle:SetValue(true)
-	Nospread = JSON.Nospread
-	print(Nospread)
-	NospreadToggle:SetValue(true)
-	JSON.TargetType 
-	JSON.HitpartSelectOption 
-	JSON.BodyAimSelectOption 
-	JSON.AntiAimEnable 
-	JSON.HeadDisable 
-	JSON.PitchSelectOption 
-	JSON.AntiAimDown 
-	JSON.Downscale 
-	JSON.aaspeed 
-	JSON.aasmooth
-	JSON.SilentAimEnabled
-	JSON.SilentAimFOV
-	JSON.FovCircleEnable 
-	JSON.HeadShotChance 
-	JSON.BodyShotChance 
-	JSON.TriggerbotEnable 
-	JSON.Triggerdelay 
-	JSON.BTEnable 
-	JSON.BTLength 
-	JSON.ESPEnabled 
-	JSON.ESPShowTeam 
-	JSON.ESPBoxes 
-	JSON.ESPShowInfo 
-	JSON.ESPInfoName 
-	JSON.ESPInfoWeapons 
-	JSON.ESPInfoHealth 
-	JSON.ESPInfoDistance 
-	JSON.EnemyEnableChams
-	JSON.ChamsEnabled
-	JSON.TeamEnableChams 
-	JSON.DroppedBombTimer  
-	JSON.DroppedBombEspEnabled  
-	JSON.AmbientLighting  
-	JSON.ColorCorrectionEnabled 
-	JSON.FovValue 
-	JSON.FovEnabled
-	JSON.ThirdPerson 
-	JSON.TPAmount 
-	JSON.ScopeDisable 
-	JSON.ArmsEnable 
-	JSON.EnableKillSound 
-	JSON.EnableHitSound  
-	JSON.BulletHolesEnabled  
-	JSON.WorldShadowsEnable  
-	JSON.BhopAmount 
-	JSON.EnableBhop 
-	JSON.BloodEnabled 
-end	
-
-local function resetToDefaults()
-writefile(Name, game:service'HttpService':JSONEncode(DefaultSettings))
-end
-
-local SaveButton = ConfigSection:CreateButton("Save", function()
-	Save()
-end)
-
-local LoadButton = ConfigSection:CreateButton("Load", function()
-	Load()
-end)
-
-local ResetButton = ConfigSection:CreateButton("Reset", function()
-	resetToDefaults()
-end)--]]
