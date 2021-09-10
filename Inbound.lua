@@ -6,8 +6,6 @@ local Config = {
 	Keybind = Enum.KeyCode.Insert
 }
 
-
-
 local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pawel12d/hexagon/main/scripts/ESP.lua"))()
 Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
 local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
@@ -18,17 +16,12 @@ local RageTab = Window:CreateTab("Rage")
 local Ragebot = RageTab:CreateSection("Rage bot")
 
 local RageBotEnable = false
-local RageToggle = Ragebot:CreateToggle("Enable", false, function(State)
+ RageToggle = Ragebot:CreateToggle("Enable", false, function(State)
 	RageBotEnable = State
 end)
 
-local InstantKill = false
-local InstantKillToggle = Ragebot:CreateToggle("Instant Kill", false, function(State)
-	InstantKill = State
-end)
-
 local Nospread = false
-local NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
+ NospreadToggle = Ragebot:CreateToggle("Nospread", false, function(State)
 	Nospread = State
 end)
 
@@ -55,64 +48,41 @@ KillallEnableToggle = Ragebot:CreateToggle("Kill all", false, function(State)
 	KillallEnable = State
 end)
 
-game:GetService("RunService").RenderStepped:connect(function()
-	if KillallEnable then
-		for i,v in pairs(game.Players:GetPlayers()) do 
-			if v.Character and v ~= game.Players.LocalPlayer and v.TeamColor ~= game.Players.LocalPlayer.TeamColor then
-				local oh1 = v.Character.Head
-				local oh2 = v.Character.Head.CFrame.p
-				local oh3 = "AWP"
-				local oh4 = 4096
-				local oh5 = game.Players.LocalPlayer.Character.Gun
-				local oh8 = 15
-				local oh9 = false
-				local oh10 = false
-				local oh11 = Vector3.new(-126.878326, 353.474854, 49.3892708)
-				local oh12 = 16868
-				local oh13 = Vector3.new(0, 0, -1)
-				game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
-				game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
-				game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
-			end
-		end
-	end
-end)
-
 local AntiAimSection = RageTab:CreateSection("Anti Aim")
 
 local AntiAimEnable = false
-local AntiAimToggle = AntiAimSection:CreateToggle("Enable Antiaim", false, function(State)
+AntiAimToggle = AntiAimSection:CreateToggle("Enable Antiaim", false, function(State)
 	AntiAimEnable = State
 end)
 
 local HeadDisable = false
-local HeadDisableToggle = AntiAimSection:CreateToggle("Break Head", false, function(State)
+HeadDisableToggle = AntiAimSection:CreateToggle("Break Head", false, function(State)
 	HeadDisable = State
 end)
 
+local EnableDownScale = false
+AntiAimToggle = AntiAimSection:CreateToggle("Enable DownScale", false, function(State)
+	EnableDownScale = State
+end)
+
 local PitchSelectOption = "Default"
-local PitchSlect = AntiAimSection:CreateDropdown("Pitch", {"Jitter", "Reversed", "Keybind", "Spin"}, function(String)
+PitchSlect = AntiAimSection:CreateDropdown("Pitch", {"Jitter", "Reversed", "Keybind", "Spin"}, function(String)
 	PitchSelectOption = String
 end)
 PitchSlect:SetOption("Default")
 
-local AntiAimDown = false
-local DownToggle = AntiAimSection:CreateToggle("Head Down", false, function(State)
-	AntiAimDown = State
-end)
-
 local Downscale = 0
-local YawManualSlider = AntiAimSection:CreateSlider("DownScale", 0,15, 0 ,true, function(Value)
+YawManualSlider = AntiAimSection:CreateSlider("DownScale", 0,15, 0 ,true, function(Value)
 	Downscale = Value
 end)
 
 local aaspeed = 0
-local AASpeedSlider = AntiAimSection:CreateSlider("Spin Speed", 0,100, 50 ,true, function(Value)
+AASpeedSlider = AntiAimSection:CreateSlider("Spin Speed", 0,100, 50 ,true, function(Value)
 	aaspeed = Value
 end)
 
 local aasmooth = 0
-local AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 ,true, function(Value)
+AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 ,true, function(Value)
 	aasmooth = Value
 end)
 
@@ -325,8 +295,6 @@ ESPColorPickerTeam:UpdateColor(Color3.fromRGB(255, 255, 255))
 ChamsColorPickerTeam:UpdateColor(Color3.fromRGB(255,255,255))
 ChamsColorPicker:UpdateColor(Color3.fromRGB(255,255,255))
 
-
-
 ----World Tab
 local WorldTab = Window:CreateTab("World")
 
@@ -405,6 +373,13 @@ end)
 local ArmsEnable = true
 TPArms = SelfVisuals:CreateToggle("Enable Arms", nil, function(State)
 	ArmsEnable = not State
+end)
+
+local Tracers = WorldTab:CreateSection("Tracers")
+
+local EnableMarker = false
+local BeamToggleButton = Tracers:CreateToggle("Beam HitMarker", false, function(State)
+	EnableMarker = State
 end)
 
 local HitSounds = WorldTab:CreateSection("Sounds")
@@ -802,7 +777,12 @@ function gettarget()
 	return nearestcharacter
 end
 
+
 local RageTarget
+local Camera = workspace.CurrentCamera
+local library = {}
+local TweenService = game:GetService("TweenService")
+function library:Tween(...) TweenService:Create(...):Play() end
 
 mt.__namecall = newClose(function(...)
 	local method = namecallMethod()
@@ -815,21 +795,10 @@ mt.__namecall = newClose(function(...)
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (m.Hit.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		end
 	elseif tostring(method) == "FireServer" and tostring(args[1]) == "HitPart" then
-		if InstantKill  then
-			args[9] = 10
-		end
 		if m.Target and m.Target.Name == 'backtrackPART' and 0 < m.Target.thing.Value.Humanoid.Health then
 			args[2] = m.Target.thing.Value.Head
 			args[3] = m.Target.thing.Value.Head.CFrame.p
 		end
-		if target or RageTarget then
-			spawn(function()
-				if BulletTracers then
-					beam(args[2],args[3],lplr.Character.Head.CFrame.p)
-				end
-			end)
-		end
-
 		-- bypass start
 	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
 		return wait(99e99)
@@ -839,12 +808,6 @@ mt.__namecall = newClose(function(...)
 	-- bypass end
 	return oldNamecall(unpack(args))
 end)
-
-
-
-
-
-
 ----Loops
 spawn(function() --Triggerbot
 	while wait(0.1) do
@@ -896,57 +859,6 @@ spawn(function() --bt
 end)
 
 local UserInputService = game:GetService("UserInputService")
-
-
-game:GetService("RunService").RenderStepped:Connect(function() 
-	if ChamsEnabled then
-		turn_on()
-	else
-		turn_off()
-	end
-	if AmbientLighting then
-		game.Lighting.Ambient = AmbientColor
-	else
-		game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
-	end
-	if FovEnabled then
-		game.Workspace.CurrentCamera.FieldOfView = FovValue  
-	else
-		game.Workspace.CurrentCamera.FieldOfView  = DefualtFovValue
-	end
-	if ThirdPerson then
-		game.Players.LocalPlayer.CameraMaxZoomDistance = TPAmount
-		game.Players.LocalPlayer.CameraMinZoomDistance = TPAmount
-		if ArmsEnable then
-			for _,v in pairs(workspace.Camera:GetDescendants()) do 
-				pcall(function() 
-				v.Transparency=1
-				end)
-			end
-		end
-	else
-		game.Players.LocalPlayer.CameraMaxZoomDistance = 0
-		game.Players.LocalPlayer.CameraMinZoomDistance = 0
-	end
-	local yeet = gettarget()
-	if yeet then
-		target = yeet
-	else
-		target = nil
-	end
-	local xd = math.random(0,100)
-	if ForceHeadShot then
-		bodyname = 'Head'
-	else
-		if (HeadShotChance or 0) <= xd then 
-			bodyname = 'UpperTorso'
-		elseif (BodyShotChance or 0) >= xd then
-			bodyname = 'Head'
-		else
-			bodyname = 'Head'
-		end
-	end
-end)
 
 ----On start scripts
 
@@ -1050,13 +962,17 @@ function gettargetrage()
 	return nearestcharacter
 end
 
+
+local canshoot = true
+local CrouchFix = false
+
 mt.__namecall = newClose(function(...)
 	local method = namecallMethod()
 	local args = {...}
 	if method == "FindPartOnRayWithIgnoreList" then
 		table.insert(args[3],backtrackfolder)
-		if RageTarget and RageBotEnable then 
-			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (RageTarget[bodyname].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
+		if RageTarget and RageBotEnable and CrouchFix then 
+			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (RageTarget[HitpartSelectOption].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		end
 	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
 		return wait(99e99)
@@ -1067,156 +983,10 @@ mt.__namecall = newClose(function(...)
 	return oldNamecall(unpack(args))
 end)
 
-local RageTarget
-local canshoot = true
+
 
 local Arguments
 local LastShot = "Head"
-
-game:GetService("RunService").RenderStepped:Connect(function() 
-local yeet = gettargetrage()
-	if yeet then
-		RageTarget = yeet
-	else
-		RageTarget = nil
-	end
-	if RageBotEnable then
-		if IsAlive(LocalPlayer) then
-			if BulletCheck(RageTarget) then
-				if canshoot then
-					canshoot = false
-					if BodyAimSelectOption == "Every Other shot" then
-					Arguments = {
-					[1] = workspace[RageTarget.Name][LastShot],
-					[2] = workspace[RageTarget.Name][LastShot].Position,
-					[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
-					[4] = 100,
-					[5] = "Awp",
-					[8] = 1,
-					[9] = false,
-					[10] = true,
-					[11] = Vector3.new(),
-					[12] = 100,
-					[13] = Vector3.new()
-					}
-					else
-						Arguments = {
-							[1] = workspace[RageTarget.Name][HitpartSelectOption],
-							[2] = workspace[RageTarget.Name][HitpartSelectOption].Position,
-							[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
-							[4] = 100,
-							[5] = "Awp",
-							[8] = 1,
-							[9] = false,
-							[10] = true,
-							[11] = Vector3.new(),
-							[12] = 100,
-							[13] = Vector3.new()
-							}
-					end
-
-
-					game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
-
-				
-					if BodyAimSelectOption ~= "None" then
-						if BodyAimSelectOption == "Every Other shot" then
-							if LastShot == "Head" then
-								LastShot = "UpperTorso" 
-							else
-								LastShot = "Head"
-							end
-						end
-					end
-					local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
-					wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
-					canshoot = true
-				end
-		end
-		else
-		canshoot = true
-		end
-	end
-	if workspace.Status.RoundOver.Value == true then
-		canshoot = true
-	end
-end)
-
-
-function characterrotate(pos)
-	pcall(function()
-		if game.Players.LocalPlayer.Character then
-			game.Players.LocalPlayer.Character.Humanoid.AutoRotate = false
-			local gyro = Instance.new('BodyGyro')
-			gyro.D = (aasmooth or 0)
-			gyro.P = 1000000
-			gyro.MaxTorque = Vector3.new(0, 1000000, 0)
-			gyro.Parent = game.Players.LocalPlayer.Character.UpperTorso
-			gyro.CFrame = CFrame.new(gyro.Parent.Position,  pos)
-			wait()
-			gyro:Destroy()
-		end
-	end)
-end
-
-
-
-local leftrotation = CFrame.new(-150,0,0)
-local rightrotation = CFrame.new(150,0,0)
-local backrotation = CFrame.new(-4,0,0)
-local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
-
-local inputser = game:GetService("UserInputService")
-_G.keydownawsd = 'a'
-game:GetService("RunService").RenderStepped:Connect(function()
-	if AntiAimEnable == true then
-		if  PitchSelectOption == 'Keybind' then
-			if _G.keydownawsd == 'd' then
-				characterrotate((workspace.CurrentCamera.CFrame * rightrotation).p)
-			elseif _G.keydownawsd == 's' then
-				characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
-			elseif _G.keydownawsd == 'a' then
-				characterrotate((workspace.CurrentCamera.CFrame * leftrotation).p)
-			end
-		elseif PitchSelectOption== 'Reversed' then
-			characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
-		elseif PitchSelectOption == 'Jitter' then
-			if game.Players.LocalPlayer.Character then
-				game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
-				local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
-				spin.AngularVelocity = Vector3.new(0, math.random(-60000,55000), 0)
-				spin.MaxTorque = Vector3.new(0, 35000, 0)
-				wait()
-				spin:Destroy()
-			end
-		elseif PitchSelectOption == 'Spin' then
-			if game.Players.LocalPlayer.Character then
-				game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
-				local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
-				spin.AngularVelocity = Vector3.new(0, aaspeed , 0)
-				spin.MaxTorque = Vector3.new(0, 50000, 0)
-				wait()
-				spin:Destroy()
-			end
-		end
-	elseif game.Players.LocalPlayer.Character then
-		game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = true
-	end
-
-	if AntiAimDown then
-		game.ReplicatedStorage.Events.ControlTurn:FireServer(-((Downscale*0.05) + 0.96247750520706))
-	end
-
-	if inputser:IsKeyDown(Enum.KeyCode.Left) then
-		_G.keydownawsd = 'a'
-	elseif inputser:IsKeyDown(Enum.KeyCode.Right) then
-		_G.keydownawsd = 'd'
-	elseif inputser:IsKeyDown(Enum.KeyCode.Down) then
-		_G.keydownawsd = 's'
-	end	
-end)
-
-
 
 local curVel = 16
 local isBhopping = false
@@ -1251,6 +1021,22 @@ local function CharacterAdded()
 	end
 end
 
+function characterrotate(pos)
+	pcall(function()
+		if game.Players.LocalPlayer.Character then
+			game.Players.LocalPlayer.Character.Humanoid.AutoRotate = false
+			local gyro = Instance.new('BodyGyro')
+			gyro.D = (aasmooth or 0)
+			gyro.P = 1000000
+			gyro.MaxTorque = Vector3.new(0, 1000000, 0)
+			gyro.Parent = game.Players.LocalPlayer.Character.UpperTorso
+			gyro.CFrame = CFrame.new(gyro.Parent.Position,  pos)
+			wait()
+			gyro:Destroy()
+		end
+	end)
+end
+
 
 
 oldNewIndex = hookfunc(getrawmetatable(game.Players.LocalPlayer.PlayerGui.Client).__newindex, newcclosure(function(self, idx, val)
@@ -1280,6 +1066,63 @@ game.Players.LocalPlayer.Status.Kills.Changed:Connect(function(val)
 		marker.Volume = 3
 		marker:Play()
 	end
+end)
+
+LocalPlayer.Additionals.TotalDamage:GetPropertyChangedSignal("Value"):Connect(function(current)
+	if current == 0 then return end
+	coroutine.wrap(function()
+		if EnableMarker then
+			local Line = Drawing.new("Line")
+			local Line2 = Drawing.new("Line")
+			local Line3 = Drawing.new("Line")
+			local Line4 = Drawing.new("Line")
+
+			local x, y = Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2
+
+			Line.From = Vector2.new(x + 4, y + 4)
+			Line.To = Vector2.new(x + 10, y + 10)
+			Line.Color = Color3.fromRGB(255,255,255)
+			Line.Visible = true 
+
+			Line2.From = Vector2.new(x + 4, y - 4)
+			Line2.To = Vector2.new(x + 10, y - 10)
+			Line2.Color = Color3.fromRGB(255,255,255)
+			Line2.Visible = true 
+
+			Line3.From = Vector2.new(x - 4, y - 4)
+			Line3.To = Vector2.new(x - 10, y - 10)
+			Line3.Color = Color3.fromRGB(255,255,255)
+			Line3.Visible = true 
+
+			Line4.From = Vector2.new(x - 4, y + 4)
+			Line4.To = Vector2.new(x - 10, y + 10)
+			Line4.Color = Color3.fromRGB(255,255,255)
+			Line4.Visible = true
+
+			Line.Transparency = 1
+			Line2.Transparency = 1
+			Line3.Transparency = 1
+			Line4.Transparency = 1
+
+			Line.Thickness = 1
+			Line2.Thickness = 1
+			Line3.Thickness = 1
+			Line4.Thickness = 1
+
+			wait(0.3)
+			for i = 1,0,-0.1 do
+				wait()
+				Line.Transparency = i 
+				Line2.Transparency = i
+				Line3.Transparency = i
+				Line4.Transparency = i
+			end
+			Line:Remove()
+			Line2:Remove()
+			Line3:Remove()
+			Line4:Remove()
+		end
+	end)()
 end)
 
 spawn(function()
@@ -1883,3 +1726,196 @@ LocalPlayer.SkinFolder.CTFolder:Destroy()
 TClone.Parent = LocalPlayer.SkinFolder
 CTClone.Parent = LocalPlayer.SkinFolder
 
+local leftrotation = CFrame.new(-150,0,0)
+local rightrotation = CFrame.new(150,0,0)
+local backrotation = CFrame.new(-4,0,0)
+local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
+
+	
+local inputser = game:GetService("UserInputService")
+_G.keydownawsd = 'a'
+game:GetService("RunService").RenderStepped:Connect(function()
+	if AntiAimEnable == true then
+			if  PitchSelectOption == 'Keybind' then
+				if _G.keydownawsd == 'd' then
+					characterrotate((workspace.CurrentCamera.CFrame * rightrotation).p)
+				elseif _G.keydownawsd == 's' then
+					characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
+				elseif _G.keydownawsd == 'a' then
+					characterrotate((workspace.CurrentCamera.CFrame * leftrotation).p)
+				end
+			elseif PitchSelectOption== 'Reversed' then
+				characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
+			elseif PitchSelectOption == 'Jitter' then
+				if game.Players.LocalPlayer.Character then
+					game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
+					local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
+					spin.AngularVelocity = Vector3.new(0, math.random(-60000,55000), 0)
+					spin.MaxTorque = Vector3.new(0, 35000, 0)
+					wait()
+					spin:Destroy()
+				end
+			elseif PitchSelectOption == 'Spin' then
+				if game.Players.LocalPlayer.Character then
+					game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = false
+					local spin = Instance.new('BodyAngularVelocity',game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart'))
+					spin.AngularVelocity = Vector3.new(0, aaspeed , 0)
+					spin.MaxTorque = Vector3.new(0, 50000, 0)
+					wait()
+					spin:Destroy()
+				end
+			end
+		elseif game.Players.LocalPlayer.Character then
+			game.Players.LocalPlayer.Character:WaitForChild("Humanoid").AutoRotate = true
+		end
+	
+		if EnableDownScale then
+			game.ReplicatedStorage.Events.ControlTurn:FireServer(-((Downscale*0.05) + 0.96247750520706))
+		end
+	
+		if inputser:IsKeyDown(Enum.KeyCode.Left) then
+			_G.keydownawsd = 'a'
+		elseif inputser:IsKeyDown(Enum.KeyCode.Right) then
+			_G.keydownawsd = 'd'
+		elseif inputser:IsKeyDown(Enum.KeyCode.Down) then
+			_G.keydownawsd = 's'
+		end	
+		if ChamsEnabled then
+			turn_on()
+		else
+			turn_off()
+		end
+		if AmbientLighting then
+			game.Lighting.Ambient = AmbientColor
+		else
+			game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+		end
+		if FovEnabled then
+			game.Workspace.CurrentCamera.FieldOfView = FovValue  
+		else
+			game.Workspace.CurrentCamera.FieldOfView  = DefualtFovValue
+		end
+		if ThirdPerson then
+			game.Players.LocalPlayer.CameraMaxZoomDistance = TPAmount
+			game.Players.LocalPlayer.CameraMinZoomDistance = TPAmount
+			if ArmsEnable then
+				for _,v in pairs(workspace.Camera:GetDescendants()) do 
+					pcall(function() 
+					v.Transparency=1
+					end)
+				end
+			end
+		else
+			game.Players.LocalPlayer.CameraMaxZoomDistance = 0
+			game.Players.LocalPlayer.CameraMinZoomDistance = 0
+		end
+		local yeet = gettarget()
+		if yeet then
+			target = yeet
+		else
+			target = nil
+		end
+		local xd = math.random(0,100)
+		if ForceHeadShot then
+			bodyname = 'Head'
+		else
+			if (HeadShotChance or 0) <= xd then 
+				bodyname = 'UpperTorso'
+			elseif (BodyShotChance or 0) >= xd then
+				bodyname = 'Head'
+			else
+				bodyname = 'Head'
+			end
+		end
+		
+		if KillallEnable then
+			for i,v in pairs(game.Players:GetPlayers()) do 
+				if v.Character and v ~= game.Players.LocalPlayer and v.TeamColor ~= game.Players.LocalPlayer.TeamColor then
+					local oh1 = v.Character.Head
+					local oh2 = v.Character.Head.CFrame.p
+					local oh3 = "AWP"
+					local oh4 = 4096
+					local oh5 = game.Players.LocalPlayer.Character.Gun
+					local oh8 = 15
+					local oh9 = false
+					local oh10 = false
+					local oh11 = Vector3.new(-126.878326, 353.474854, 49.3892708)
+					local oh12 = 16868
+					local oh13 = Vector3.new(0, 0, -1)
+					game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
+					game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
+					game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
+				end
+			end
+		end
+
+		local yeet = gettargetrage()
+		if yeet then
+			RageTarget = yeet
+		else
+			RageTarget = nil
+		end
+		if RageBotEnable then
+			if IsAlive(LocalPlayer) then
+				if BulletCheck(RageTarget) then
+					if canshoot then
+						canshoot = false
+						if BodyAimSelectOption == "Every Other shot" then
+						Arguments = {
+						[1] = workspace[RageTarget.Name][LastShot],
+						[2] = workspace[RageTarget.Name][LastShot].Position,
+						[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+						[4] = 100,
+						[5] = "Awp",
+						[8] = 1,
+						[9] = false,
+						[10] = true,
+						[11] = Vector3.new(),
+						[12] = 100,
+						[13] = Vector3.new()
+						}
+						else
+							Arguments = {
+								[1] = workspace[RageTarget.Name][HitpartSelectOption],
+								[2] = workspace[RageTarget.Name][HitpartSelectOption].Position,
+								[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+								[4] = 100,
+								[5] = "Awp",
+								[8] = 1,
+								[9] = false,
+								[10] = true,
+								[11] = Vector3.new(),
+								[12] = 100,
+								[13] = Vector3.new()
+								}
+						end
+						
+						CrouchFix = true
+						Client.firebullet()
+						CrouchFix = false
+
+						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+	
+						if BodyAimSelectOption ~= "None" then
+							if BodyAimSelectOption == "Every Other shot" then
+								if LastShot == "Head" then
+									LastShot = "UpperTorso" 
+								else
+									LastShot = "Head"
+								end
+							end
+						end
+						local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
+						wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
+						canshoot = true
+					end
+			end
+		else
+			canshoot = true
+		end
+	end
+	if workspace.Status.RoundOver.Value == true then
+		canshoot = true
+	end
+end)
+print("Loaded!")
