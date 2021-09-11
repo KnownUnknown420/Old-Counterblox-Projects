@@ -25,6 +25,11 @@ local Nospread = false
 	Nospread = State
 end)
 
+local DTEnable = false
+ RageToggle = Ragebot:CreateToggle("Enable DoubleTap", false, function(State)
+	DTEnable = State
+end)
+
 local TargetType = "Closest from Mouse"
 TargetSelect = Ragebot:CreateDropdown("Targeting Method", {"Closest from Mouse","Closest from player"}, function(String)
 	TargetType = String
@@ -378,7 +383,7 @@ end)
 local Tracers = WorldTab:CreateSection("Tracers")
 
 local EnableMarker = false
-local BeamToggleButton = Tracers:CreateToggle("Beam HitMarker", false, function(State)
+local BeamToggleButton = Tracers:CreateToggle("HitMarker", false, function(State)
 	EnableMarker = State
 end)
 
@@ -1816,17 +1821,14 @@ game:GetService("RunService").RenderStepped:Connect(function()
 			target = nil
 		end
 		local xd = math.random(0,100)
-		if ForceHeadShot then
+		if (HeadShotChance or 0) <= xd then 
+			bodyname = 'UpperTorso'
+		elseif (BodyShotChance or 0) >= xd then
 			bodyname = 'Head'
 		else
-			if (HeadShotChance or 0) <= xd then 
-				bodyname = 'UpperTorso'
-			elseif (BodyShotChance or 0) >= xd then
-				bodyname = 'Head'
-			else
-				bodyname = 'Head'
-			end
+			bodyname = 'Head'
 		end
+
 		
 		if KillallEnable then
 			for i,v in pairs(game.Players:GetPlayers()) do 
@@ -1892,9 +1894,14 @@ game:GetService("RunService").RenderStepped:Connect(function()
 						
 						CrouchFix = true
 						Client.firebullet()
-						CrouchFix = false
-
 						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+
+						if DTEnable then 
+							Client.firebullet()
+							game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+						end 
+
+						CrouchFix = false
 	
 						if BodyAimSelectOption ~= "None" then
 							if BodyAimSelectOption == "Every Other shot" then
@@ -1905,9 +1912,13 @@ game:GetService("RunService").RenderStepped:Connect(function()
 								end
 							end
 						end
+
+
 						local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
 						wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
 						canshoot = true
+
+
 					end
 			end
 		else
@@ -1917,5 +1928,18 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	if workspace.Status.RoundOver.Value == true then
 		canshoot = true
 	end
+
+	if IsAlive(LocalPlayer) == false then
+		canshoot = true
+	end
+
+	if RageTarget == nil then
+		canshoot = true
+	end
+
+	if RageBotEnable == false then
+		canshoot = true
+	end
+
 end)
 print("Loaded!")
