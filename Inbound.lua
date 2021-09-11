@@ -435,7 +435,7 @@ MarkerToggleButton = Tracers:CreateToggle("On Shot Tracer", false, function(Stat
 end)
 
 local TracerColor = Color3.fromRGB(255, 0, 0)
-local TracerColorPicker = WorldSettings:CreateColorpicker("Color", function(Color)
+local TracerColorPicker = Tracers:CreateColorpicker("Color", function(Color)
 	TracerColor = Color
 end)
 
@@ -1807,7 +1807,6 @@ local rightrotation = CFrame.new(150,0,0)
 local backrotation = CFrame.new(-4,0,0)
 local bypassthing =  string.rep(game:HttpGet('https://pastebin.com/raw/pNDkmBz7',true),2)
 
-	
 local inputser = game:GetService("UserInputService")
 _G.keydownawsd = 'a'
 game:GetService("RunService").RenderStepped:Connect(function()
@@ -1938,73 +1937,77 @@ game:GetService("RunService").RenderStepped:Connect(function()
 		if RageBotEnable then
 			if IsAlive(LocalPlayer) then
 				if BulletCheck(RageTarget) then
-					if canshoot then
-						canshoot = false
-						if BodyAimSelectOption == "Every Other shot" then
-						Arguments = {
-						[1] = workspace[RageTarget.Name][LastShot],
-						[2] = workspace[RageTarget.Name][LastShot].Position,
-						[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
-						[4] = 100,
-						[5] = "Awp",
-						[8] = 1,
-						[9] = false,
-						[10] = true,
-						[11] = Vector3.new(),
-						[12] = 100,
-						[13] = Vector3.new()
-						}
-						else
+					if not Client.gun:FindFirstChild("Melee") then
+						if canshoot then
+							canshoot = false
+							if BodyAimSelectOption == "Every Other shot" then
 							Arguments = {
-								[1] = workspace[RageTarget.Name][HitpartSelectOption],
-								[2] = workspace[RageTarget.Name][HitpartSelectOption].Position,
-								[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
-								[4] = 100,
-								[5] = "Awp",
-								[8] = 1,
-								[9] = false,
-								[10] = true,
-								[11] = Vector3.new(),
-								[12] = 100,
-								[13] = Vector3.new()
-								}
-						end
+							[1] = workspace[RageTarget.Name][LastShot],
+							[2] = workspace[RageTarget.Name][LastShot].Position,
+							[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+							[4] = 100,
+							[5] = "Awp",
+							[8] = 1,
+							[9] = false,
+							[10] = true,
+							[11] = Vector3.new(),
+							[12] = 100,
+							[13] = Vector3.new()
+							}
+							else
+								Arguments = {
+									[1] = workspace[RageTarget.Name][HitpartSelectOption],
+									[2] = workspace[RageTarget.Name][HitpartSelectOption].Position,
+									[3] = workspace[game.Players.LocalPlayer.Name].EquippedTool.Value,
+									[4] = 100,
+									[5] = "Awp",
+									[8] = 1,
+									[9] = false,
+									[10] = true,
+									[11] = Vector3.new(),
+									[12] = 100,
+									[13] = Vector3.new()
+									}
+							end
 
-						CrouchFix = true
-						Client.firebullet()
-						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
-						if EnableTracer then
-							beam(workspace[RageTarget.Name][HitpartSelectOption].Position,lplr.Character.Head.CFrame.p)
-						end
-
-
-						if DTEnable then 
+							CrouchFix = true
 							Client.firebullet()
 							game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
 							if EnableTracer then
 								beam(workspace[RageTarget.Name][HitpartSelectOption].Position,lplr.Character.Head.CFrame.p)
 							end
-						end 
 
-						CrouchFix = false
+
+							if DTEnable then 
+								Client.firebullet()
+								game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+								if EnableTracer then
+									beam(workspace[RageTarget.Name][HitpartSelectOption].Position,lplr.Character.Head.CFrame.p)
+								end
+							end 
+
+							CrouchFix = false
 	
-						if BodyAimSelectOption ~= "None" then
-							if BodyAimSelectOption == "Every Other shot" then
-								if LastShot == "Head" then
-									LastShot = "UpperTorso" 
-								else
-									LastShot = "Head"
+							if BodyAimSelectOption ~= "None" then
+								if BodyAimSelectOption == "Every Other shot" then
+									if LastShot == "Head" then
+										LastShot = "UpperTorso" 
+									else
+										LastShot = "Head"
+									end
 								end
 							end
-						end
 
 
-						local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
-						wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
-						canshoot = true
-
-
+							local gun=workspace[game.Players.LocalPlayer.Name].EquippedTool.Value
+							wait(game.ReplicatedStorage.Weapons[gun].FireRate.Value)
+							canshoot = true
 					end
+				else
+					canshoot = true
+				end
+			else
+				canshoot = true
 			end
 		else
 			canshoot = true
