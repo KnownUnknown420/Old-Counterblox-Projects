@@ -91,7 +91,51 @@ AAsmoothSlider = AntiAimSection:CreateSlider("Turn Smoothness", 0,100, 50 ,true,
 	aasmooth = Value
 end)
 
+local Main = Instance.new("ScreenGui")
+local Left = Instance.new("ImageLabel")
+local Right = Instance.new("ImageLabel")
+local Down = Instance.new("ImageLabel")
 
+Main.Parent = game.CoreGui
+
+Left.Name = "Left"
+Left.Parent = Main
+Left.BackgroundColor3 = Color3.fromRGB(172, 172, 172)
+Left.BackgroundTransparency = 1.000
+Left.Position = UDim2.new(0.458395243, -28, 0.490184069, -31)
+Left.Size = UDim2.new(0, 56, 0, 63)
+Left.Image = "http://www.roblox.com/asset/?id=255515174"
+
+Right.Name = "Right"
+Right.Parent = Main
+Right.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Right.BackgroundTransparency = 1.000
+Right.Position = UDim2.new(0.541604757, -28, 0.490184069, -31)
+Right.Rotation = 180.000
+Right.Size = UDim2.new(0, 56, 0, 63)
+Right.Image = "http://www.roblox.com/asset/?id=255515174"
+
+Down.Name = "Down"
+Down.Parent = Main
+Down.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Down.BackgroundTransparency = 1.000
+Down.Position = UDim2.new(0.5, -28, 0.567484677, -31)
+Down.Rotation = 90.000
+Down.Size = UDim2.new(0, 56, 0, 63)
+Down.Image = "http://www.roblox.com/asset/?id=255515174"
+Down.ImageColor3 = Color3.fromRGB(247, 0, 255)
+
+
+
+IndicatorToggle = AntiAimSection:CreateToggle("Indicators", false, function(State)
+	Main.Enabled = State
+end)
+
+
+local ArrowColor = Color3.fromHSV(0, 0, 1)
+ArrowColorPicker = AntiAimSection:CreateColorpicker("Arrow Color", function(Color)
+	ArrowColor = Color
+end)
 
 --[[local Crimwalk = AntiAimSection:CreateButton("CrimWalk ;)", function()
 	local lplr = game:GetService("Players").LocalPlayer
@@ -108,8 +152,6 @@ if lplr.Character and not lplr:FindFirstChild('XDDLA') then
 end
 end)--]]
 	
-
-
 ---Aimbot Tab
 
 local AimbotTab = Window:CreateTab("Legit")
@@ -739,6 +781,40 @@ function backtrack(character)
 	end)
 end
 
+local lifetime = 5
+local lp = game:GetService("Players").LocalPlayer
+local rs = game:GetService("RunService").RenderStepped
+local lasthittick = tick()
+function createBeam(v1, v2)
+	local b1 = Instance.new("Part", workspace["Ray_Ignore"])
+	b1.Size = Vector3.new(0.0001,0.0001,0.0001)
+	b1.Transparency = 1
+	b1.CanCollide = false
+	b1.CFrame = CFrame.new(v1)
+	b1.Anchored = true
+	local a1 = Instance.new("Attachment", b1)
+	local b2 = Instance.new("Part", workspace["Ray_Ignore"])
+	b2.Size = Vector3.new(0.0001,0.0001,0.0001)
+	b2.Transparency = 1
+	b2.CanCollide = false
+	b2.CFrame = CFrame.new(v2)
+	b2.Anchored = true
+	local a2 = Instance.new("Attachment", b2)
+	local b = Instance.new("Beam", b1)
+	local color = script.Parent.Parent.Parent.Parent.Parent.Visual.Main.OtherESPTab.Tracers.Color.BackgroundColor3 
+	b.FaceCamera = true
+	b.Attachment0 = a1
+	b.Attachment1 = a2
+	b.LightEmission = 1
+	b.LightInfluence = 0
+	b.Color = ColorSequence.new(color, color)
+	b.Width0 = 0.05
+	b.Width1 = 0.05
+	b.Transparency = NumberSequence.new(0,0)
+	return b
+end
+
+
 
 function gettarget()
 	local nearestmag = SilentAimFOV
@@ -979,7 +1055,8 @@ mt.__namecall = newClose(function(...)
 		if RageTarget and RageBotEnable and CrouchFix then 
 			args[2] = Ray.new(workspace.CurrentCamera.CFrame.Position, (RageTarget[HitpartSelectOption].CFrame.p - workspace.CurrentCamera.CFrame.Position).unit * 500)
 		end
-	elseif tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
+	end
+	if tostring(method) == "InvokeServer" and tostring(args[1]) == "Hugh" then
 		return wait(99e99)
 	elseif tostring(method) == "FireServer" and string.find(tostring(args[1]),'{') then
 		return wait(99e99)
@@ -1072,6 +1149,8 @@ game.Players.LocalPlayer.Status.Kills.Changed:Connect(function(val)
 		marker:Play()
 	end
 end)
+
+
 
 LocalPlayer.Additionals.TotalDamage:GetPropertyChangedSignal("Value"):Connect(function(current)
 	if current == 0 then return end
@@ -1744,10 +1823,19 @@ game:GetService("RunService").RenderStepped:Connect(function()
 			if  PitchSelectOption == 'Keybind' then
 				if _G.keydownawsd == 'd' then
 					characterrotate((workspace.CurrentCamera.CFrame * rightrotation).p)
+					Main.Right.ImageColor3 = ArrowColor
+					Main.Left.ImageColor3 = Color3.fromRGB(255, 255, 255)
+					Main.Down.ImageColor3 = Color3.fromRGB(255, 255, 255)
 				elseif _G.keydownawsd == 's' then
 					characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
+					Main.Right.ImageColor3 = Color3.fromRGB(255, 255, 255)
+					Main.Left.ImageColor3 = Color3.fromRGB(255, 255, 255)
+					Main.Down.ImageColor3 = ArrowColor
 				elseif _G.keydownawsd == 'a' then
 					characterrotate((workspace.CurrentCamera.CFrame * leftrotation).p)
+					Main.Right.ImageColor3 = Color3.fromRGB(255, 255, 255)
+					Main.Left.ImageColor3 = ArrowColor
+					Main.Down.ImageColor3 = Color3.fromRGB(255, 255, 255)
 				end
 			elseif PitchSelectOption== 'Reversed' then
 				characterrotate((workspace.CurrentCamera.CFrame * backrotation).p)
@@ -1844,8 +1932,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
 					local oh11 = Vector3.new(-126.878326, 353.474854, 49.3892708)
 					local oh12 = 16868
 					local oh13 = Vector3.new(0, 0, -1)
-					game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
-					game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
 					game:GetService("ReplicatedStorage").Events.HitPart:FireServer(oh1, oh2, oh3, oh4, oh5, oh6, oh7, oh8, oh9, oh10, oh11, oh12, oh13)
 				end
 			end
