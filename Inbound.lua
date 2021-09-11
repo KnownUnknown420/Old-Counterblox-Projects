@@ -425,8 +425,18 @@ end)
 local Tracers = WorldTab:CreateSection("Tracers")
 
 local EnableMarker = false
-local BeamToggleButton = Tracers:CreateToggle("HitMarker", false, function(State)
+MarkerToggleButton = Tracers:CreateToggle("HitMarker", false, function(State)
 	EnableMarker = State
+end)
+
+local EnableTracer = false
+MarkerToggleButton = Tracers:CreateToggle("On Shot Tracer", false, function(State)
+	EnableTracer = State
+end)
+
+local TracerColor = Color3.fromRGB(255, 0, 0)
+local TracerColorPicker = WorldSettings:CreateColorpicker("Color", function(Color)
+	TracerColor = Color
 end)
 
 local HitSounds = WorldTab:CreateSection("Sounds")
@@ -781,41 +791,6 @@ function backtrack(character)
 	end)
 end
 
-local lifetime = 5
-local lp = game:GetService("Players").LocalPlayer
-local rs = game:GetService("RunService").RenderStepped
-local lasthittick = tick()
-function createBeam(v1, v2)
-	local b1 = Instance.new("Part", workspace["Ray_Ignore"])
-	b1.Size = Vector3.new(0.0001,0.0001,0.0001)
-	b1.Transparency = 1
-	b1.CanCollide = false
-	b1.CFrame = CFrame.new(v1)
-	b1.Anchored = true
-	local a1 = Instance.new("Attachment", b1)
-	local b2 = Instance.new("Part", workspace["Ray_Ignore"])
-	b2.Size = Vector3.new(0.0001,0.0001,0.0001)
-	b2.Transparency = 1
-	b2.CanCollide = false
-	b2.CFrame = CFrame.new(v2)
-	b2.Anchored = true
-	local a2 = Instance.new("Attachment", b2)
-	local b = Instance.new("Beam", b1)
-	local color = script.Parent.Parent.Parent.Parent.Parent.Visual.Main.OtherESPTab.Tracers.Color.BackgroundColor3 
-	b.FaceCamera = true
-	b.Attachment0 = a1
-	b.Attachment1 = a2
-	b.LightEmission = 1
-	b.LightInfluence = 0
-	b.Color = ColorSequence.new(color, color)
-	b.Width0 = 0.05
-	b.Width1 = 0.05
-	b.Transparency = NumberSequence.new(0,0)
-	return b
-end
-
-
-
 function gettarget()
 	local nearestmag = SilentAimFOV
 	local nearestcharacter = nil
@@ -1119,7 +1094,24 @@ function characterrotate(pos)
 	end)
 end
 
-
+function beam(pos,yeeet)
+	local player = game:GetService("Players").LocalPlayer
+	local ray = Ray.new(yeeet, (pos - yeeet).unit * 300)
+	local part, position = workspace:FindPartOnRay(ray, player.Character, false, true)
+	local beam = Instance.new("Part", workspace)
+	beam.BrickColor = BrickColor.new(TracerColor)
+	beam.FormFactor = "Custom"
+	beam.Material = "Neon"
+	beam.Transparency = 0.5
+	beam.Anchored = true
+	beam.Locked = true
+	beam.CanCollide = false
+			
+	local distance = (player.Character.Head.CFrame.p - position).magnitude
+	beam.Size = Vector3.new(0.08, 0.05, distance)
+	beam.CFrame = CFrame.new(player.Character.Head.CFrame.p, position) * CFrame.new(0, 0, -distance / 2)
+	game.Debris:AddItem(beam,2)
+end
 
 oldNewIndex = hookfunc(getrawmetatable(game.Players.LocalPlayer.PlayerGui.Client).__newindex, newcclosure(function(self, idx, val)
 	if not checkcaller() then
@@ -1977,14 +1969,21 @@ game:GetService("RunService").RenderStepped:Connect(function()
 								[13] = Vector3.new()
 								}
 						end
-						
+
 						CrouchFix = true
 						Client.firebullet()
 						game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+						if EnableTracer then
+							beam(workspace[RageTarget.Name][HitpartSelectOption].Position,lplr.Character.Head.CFrame.p)
+						end
+
 
 						if DTEnable then 
 							Client.firebullet()
 							game.ReplicatedStorage.Events.HitPart:FireServer(unpack(Arguments))
+							if EnableTracer then
+								beam(workspace[RageTarget.Name][HitpartSelectOption].Position,lplr.Character.Head.CFrame.p)
+							end
 						end 
 
 						CrouchFix = false
@@ -2029,3 +2028,4 @@ game:GetService("RunService").RenderStepped:Connect(function()
 
 end)
 print("Loaded!")
+
